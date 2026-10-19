@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function Home() {
@@ -59,9 +60,12 @@ export default function Home() {
         </p>
 
         <div className="flex flex-col gap-3 sm:flex-row">
-          <button className="rounded-lg bg-[var(--primary)] px-8 py-3 text-sm font-medium text-white transition-colors hover:bg-[var(--primary-hover)]">
+          <Link
+            href="/dashboard"
+            className="rounded-lg bg-[var(--primary)] px-8 py-3 text-sm font-medium text-white transition-colors hover:bg-[var(--primary-hover)]"
+          >
             Get Started
-          </button>
+          </Link>
         </div>
 
         <div className="mt-16 grid w-full max-w-3xl grid-cols-1 gap-4 sm:grid-cols-3">
