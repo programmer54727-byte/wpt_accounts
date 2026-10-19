@@ -1,69 +1,102 @@
 import Image from "next/image";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+    <div className="min-h-screen bg-[var(--background)] text-[var(--text-primary)]">
+      {/* Top Navbar */}
+      <header className="border-b border-[var(--border)] bg-[var(--surface)]">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
+          <div className="flex items-center gap-3">
             <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
+              src="/wpt-logo.jpg"
+              alt="WPT Accounts Logo"
+              width={40}
+              height={40}
+              className="rounded-md"
+              priority
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            <div className="flex flex-col">
+              <span className="text-lg font-bold tracking-tight">
+                WPT Accounts
+              </span>
+              <span className="text-xs text-[var(--text-muted)]">
+                by Web Power Tech
+              </span>
+            </div>
+          </div>
+
+          <ThemeToggle />
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <main className="mx-auto flex max-w-6xl flex-col items-center justify-center px-4 py-24 text-center sm:px-6">
+        <div className="mb-8 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
+          <Image
+            src="/wpt-logo.jpg"
+            alt="WPT Accounts"
+            width={120}
+            height={120}
+            className="mx-auto rounded-xl"
+            priority
+          />
+        </div>
+
+        <h1 className="mb-4 text-4xl font-bold tracking-tight sm:text-5xl">
+          WPT Accounts
+        </h1>
+
+        <p className="mb-2 text-lg text-[var(--text-secondary)]">
+          Cloud-based Accounting Software
+        </p>
+
+        <p className="mb-10 max-w-xl text-[var(--text-muted)]">
+          Modern, fast and secure accounting solution for businesses.  
+          Manage invoices, expenses, ledgers and reports — all in one place.
+        </p>
+
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <button className="rounded-lg bg-[var(--primary)] px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-[var(--primary-hover)]">
+            Get Started
+          </button>
+          <button className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-6 py-3 text-sm font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--surface-elevated)]">
+            View Roadmap
+          </button>
+        </div>
+
+        <div className="mt-16 grid w-full max-w-3xl grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 text-left">
+            <div className="mb-2 text-sm font-semibold text-[var(--primary)]">
+              Invoices
+            </div>
+            <p className="text-sm text-[var(--text-secondary)]">
+              Create, send and track invoices with GST support.
+            </p>
+          </div>
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 text-left">
+            <div className="mb-2 text-sm font-semibold text-[var(--primary)]">
+              Expenses
+            </div>
+            <p className="text-sm text-[var(--text-secondary)]">
+              Record expenses and manage bills easily.
+            </p>
+          </div>
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 text-left">
+            <div className="mb-2 text-sm font-semibold text-[var(--primary)]">
+              Reports
+            </div>
+            <p className="text-sm text-[var(--text-secondary)]">
+              P&L, Balance Sheet and GST reports.
+            </p>
+          </div>
         </div>
       </main>
+
+      {/* Footer */}
+      <footer className="border-t border-[var(--border)] py-6 text-center text-sm text-[var(--text-muted)]">
+        © {new Date().getFullYear()} Web Power Tech. All rights reserved.
+      </footer>
     </div>
   );
 }
