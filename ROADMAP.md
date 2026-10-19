@@ -5,6 +5,10 @@
 This document outlines the complete development roadmap — from current status to a production-ready product.  
 Follow the phases in order for best results.
 
+**Important Note:**  
+This application has **only one role — Accountant**.  
+There are no Admin / Viewer / multi-role permissions. Every logged-in user is an Accountant with full access to the system.
+
 ---
 
 ## Current Status (as of October 2026)
@@ -64,9 +68,10 @@ Follow the phases in order for best results.
 
 ---
 
-## Phase 1 — Authentication & User Management (Week 2)
+## Phase 1 — Authentication (Week 2)
 
-**Goal:** Secure login system using Supabase Auth.
+**Goal:** Secure login system using Supabase Auth.  
+**Role:** Only Accountant (single role system)
 
 ### Steps:
 
@@ -78,8 +83,8 @@ Follow the phases in order for best results.
    - Forgot Password
    - Reset Password
 4. Protect routes (middleware)
-5. User profile page (basic)
-6. Role system foundation (Admin / Accountant / Viewer)
+5. Basic user profile page
+6. No role system needed — every user is an Accountant with full access
 
 ---
 
@@ -89,8 +94,8 @@ Follow the phases in order for best results.
 
 ### Key Tables to design:
 
-- `organizations` / `companies`
-- `users` (linked to Supabase Auth)
+- `companies` (or single company setup)
+- `users` (linked to Supabase Auth) — all users are Accountants
 - `chart_of_accounts`
 - `customers` / `vendors`
 - `invoices` + `invoice_items`
@@ -111,7 +116,7 @@ Follow the phases in order for best results.
 
 ## Phase 3 — Dashboard (Week 3)
 
-**Goal:** Beautiful and useful overview for users.
+**Goal:** Beautiful and useful overview for the Accountant.
 
 ### Features:
 
@@ -202,7 +207,6 @@ Follow the phases in order for best results.
 - Inventory management
 - Bank reconciliation + automatic import
 - Recurring invoices
-- Team collaboration & permissions
 - Mobile app (React Native / PWA)
 - AI-powered insights (expense categorization, cashflow prediction)
 - WhatsApp / Email notifications
@@ -219,6 +223,7 @@ Follow the phases in order for best results.
 | Theme             | Light + Dark (CSS variables)  |
 | Backend / DB      | Supabase (PostgreSQL)         |
 | Auth              | Supabase Auth                 |
+| Role              | Single Role — Accountant      |
 | PDF Generation    | @react-pdf/renderer or similar|
 | Charts            | Recharts or Chart.js          |
 | Deployment        | Vercel                        |
