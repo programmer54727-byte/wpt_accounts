@@ -95,7 +95,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="border-t border-[var(--border)] py-6 text-center text-sm text-[var(--text-muted)]">
-        © {new Date().getFullYear()} Web Power Tech. All rights reserved.
+        © 2026 Web Power Tech. All rights reserved.
       </footer>
     </div>
   );
