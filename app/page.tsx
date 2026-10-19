@@ -8,14 +8,15 @@ export default function Home() {
       <header className="border-b border-[var(--border)] bg-[var(--surface)]">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
           <div className="flex items-center gap-3">
-            <Image
-              src="/wpt-logo.jpg"
-              alt="WPT Accounts Logo"
-              width={40}
-              height={40}
-              className="rounded-md"
-              priority
-            />
+            <div className="relative h-10 w-10 overflow-hidden rounded-md">
+              <Image
+                src="/wpt-logo.jpg"
+                alt="WPT Accounts Logo"
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
             <div className="flex flex-col">
               <span className="text-lg font-bold tracking-tight">
                 WPT Accounts
@@ -32,15 +33,16 @@ export default function Home() {
 
       {/* Hero Section */}
       <main className="mx-auto flex max-w-6xl flex-col items-center justify-center px-4 py-24 text-center sm:px-6">
-        <div className="mb-8 rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm">
-          <Image
-            src="/wpt-logo.jpg"
-            alt="WPT Accounts"
-            width={120}
-            height={120}
-            className="mx-auto rounded-xl"
-            priority
-          />
+        <div className="mb-8 flex h-36 w-36 items-center justify-center overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-sm">
+          <div className="relative h-28 w-28">
+            <Image
+              src="/wpt-logo.jpg"
+              alt="WPT Accounts"
+              fill
+              className="object-cover rounded-xl"
+              priority
+            />
+          </div>
         </div>
 
         <h1 className="mb-4 text-4xl font-bold tracking-tight sm:text-5xl">
@@ -52,16 +54,13 @@ export default function Home() {
         </p>
 
         <p className="mb-10 max-w-xl text-[var(--text-muted)]">
-          Modern, fast and secure accounting solution for businesses.  
+          Modern, fast and secure accounting solution for businesses.
           Manage invoices, expenses, ledgers and reports — all in one place.
         </p>
 
         <div className="flex flex-col gap-3 sm:flex-row">
-          <button className="rounded-lg bg-[var(--primary)] px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-[var(--primary-hover)]">
+          <button className="rounded-lg bg-[var(--primary)] px-8 py-3 text-sm font-medium text-white transition-colors hover:bg-[var(--primary-hover)]">
             Get Started
-          </button>
-          <button className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-6 py-3 text-sm font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--surface-elevated)]">
-            View Roadmap
           </button>
         </div>
 
