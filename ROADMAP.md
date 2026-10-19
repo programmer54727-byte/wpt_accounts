@@ -17,54 +17,33 @@ There are no Admin / Viewer / multi-role permissions. Every logged-in user is an
 |-------------------------|-----------------|
 | Repository created      | ✅ Done         |
 | README + Theme docs     | ✅ Done         |
-| Next.js app scaffold    | ✅ Done (`my-app`) |
-| Official Logo           | ✅ Added        |
-| Project structure       | 🔄 In progress  |
+| Next.js app scaffold    | ✅ Done         |
+| Official Logo           | ✅ Done         |
+| Project structure       | ✅ Done         |
+| Theme (Light/Dark)      | ✅ Done         |
+| App Shell (Sidebar)     | ✅ Done         |
 | Authentication          | ⬜ Not started  |
 | Database / Supabase     | ⬜ Not started  |
 | Core Accounting modules | ⬜ Not started  |
 
 ---
 
-## Phase 0 — Project Foundation (Week 1)
+## Phase 0 — Project Foundation ✅ COMPLETE
 
 **Goal:** Clean, professional base for the entire application.
 
-### Steps:
+### Completed:
 
-1. **Move Next.js app to root (Recommended)**
-   - Currently the app is inside `my-app/`
-   - Move all files from `my-app/` to repository root for cleaner structure
-   - Update paths and commit
+1. ✅ Move Next.js app to root
+2. ✅ Finalize project structure
+3. ✅ Setup Tailwind + Theme System (Light & Dark)
+4. ✅ Theme toggle with localStorage
+5. ✅ Basic Layout — App Shell (Sidebar + Header)
+6. ✅ Dashboard placeholder page
+7. ✅ Logo integration
+8. ✅ Deployed on Vercel
 
-2. **Finalize Project Structure**
-   ```
-   /
-   ├── app/                  # Next.js App Router
-   ├── components/           # Reusable UI components
-   ├── lib/                  # Utilities, Supabase client, helpers
-   ├── types/                # TypeScript types
-   ├── public/               # Static assets (logo, icons)
-   ├── styles/               # Global styles (if needed)
-   ├── ROADMAP.md
-   ├── THEME.md
-   └── README.md
-   ```
-
-3. **Setup Tailwind + Theme System**
-   - Install and configure Tailwind CSS properly
-   - Implement Light & Dark mode using the colors defined in `THEME.md`
-   - Add theme toggle component
-   - Persist theme preference in `localStorage`
-
-4. **Add shadcn/ui (Recommended)**
-   - Initialize shadcn/ui
-   - Install core components: Button, Card, Input, Dialog, Dropdown, Table, etc.
-
-5. **Basic Layout**
-   - Create App Shell (Sidebar + Top Navbar)
-   - Responsive design (Desktop + Mobile)
-   - Logo integration in Navbar
+**Note:** shadcn/ui can be added later when needed for forms/tables.
 
 ---
 
