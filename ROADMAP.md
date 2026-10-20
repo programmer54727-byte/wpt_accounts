@@ -22,10 +22,17 @@ Follow the phases in order for best results.
 | Official logo | ✅ Done |
 | Project structure | ✅ Done |
 | Theme (Light / Dark) | ✅ Done |
-| App shell (Sidebar) | ✅ Done |
-| Authentication | ✅ Done |
-| Database / Supabase schema | ⬜ Phase 2 |
-| Core accounting modules | ⬜ Not started |
+| App shell (Sidebar + Header) | ✅ Done |
+| Tally-style navigation menu | ✅ Done |
+| Authentication (Login / Register / Logout) | ✅ Done |
+| Multi-company + onboarding | ✅ Done |
+| Default Chart of Accounts (seed) | ✅ Done |
+| Company switcher | ✅ Done |
+| Database schema (Phase 2 core) | ✅ Done |
+| Core accounting modules (invoices, etc.) | ⬜ Not started |
+| Reports with live data | ⬜ Not started |
+
+**Overall progress:** Phase 0 ✅ · Phase 1 ✅ · Phase 2 ✅ (core) · Phases 3–8 pending
 
 ---
 
@@ -61,37 +68,48 @@ Follow the phases in order for best results.
 
 ---
 
-## Phase 2 — Database, Multi-Company & Default Ledgers
+## Phase 2 — Database, Multi-Company & Default Ledgers ✅ COMPLETE (core)
 
 **Goal:** Multi-company setup, Tally-style default Chart of Accounts, and no-duplicate rules.
 
-### Design document (read first)
+### Design document
 
-👉 **[docs/PHASE2_DESIGN.md](./docs/PHASE2_DESIGN.md)**
+👉 **[docs/PHASE2_DESIGN.md](./docs/PHASE2_DESIGN.md)**  
+👉 **SQL:** [supabase/phase2_schema.sql](./supabase/phase2_schema.sql)
 
-That document covers:
+### Completed
 
-- Post-login company create / select flow
-- Multi-company tables (`companies`, `company_members`)
-- Tally-style **default ledgers** (auto-created for each new company)
-- **No-duplicate** rules (ledger, customer, vendor, invoice number)
-- RLS and data isolation per company
-- Suggested implementation order
+1. ✅ Schema: `companies`, `company_members`, `chart_of_accounts`
+2. ✅ RLS policies (data isolated per company membership)
+3. ✅ `create_default_ledgers()` — Tally-style groups + ledgers (GST not auto-seeded)
+4. ✅ `create_company_with_defaults()` RPC
+5. ✅ Uniqueness constraints (ledger name/code per company; company GSTIN)
+6. ✅ Onboarding UI (`/onboarding`) — create first / new company
+7. ✅ Select-company UI (`/select-company`)
+8. ✅ Post-login flow: no company → onboarding; one or more → select / dashboard
+9. ✅ Company switcher in header
+10. ✅ Middleware: protect app routes; redirect if no company
+11. ✅ Tally-style sidebar navigation (Masters / Vouchers / Reports / System)
 
-### Key deliverables
+### Optional / deferred (can ship with later phases)
 
-1. Schema: `companies`, `company_members`, `chart_of_accounts` (groups + ledgers)
-2. Onboarding UI: create first company after login
-3. Select-company UI (when the user has multiple companies)
-4. Seed default ledgers (Cash, Bank, Sales, Purchase, expenses, etc. — see design doc; GST ledgers are not auto-seeded)
-5. Uniqueness constraints in the database and app validation
-6. Active company context for the whole app
+- `customers` / `vendors` / `tax_rates` tables (before invoice module)
+- Chart of Accounts UI page (`/ledgers`) — full CRUD in Phase 6
+- Live data on dashboard cards (Phase 3)
 
-### Also prepare for later modules
+---
 
-- `customers` / `vendors` tables (unique per company)
-- `tax_rates`
-- Foundation for invoices / expenses (full modules in Phase 4–5)
+## Navigation structure (sidebar) ✅ IN APP
+
+| Section | Items |
+|---------|--------|
+| **Overview** | Dashboard |
+| **Masters** | Chart of Accounts, Customers, Vendors, Stock Items, Godowns, Tax Rates, Cost Centres |
+| **Vouchers** | Sales Invoice, Purchase / Bills, Payment, Receipt, Journal, Contra, Credit Note, Debit Note, Expenses |
+| **Reports** | Day Book, Cash Book, Bank Book, Ledger Statement, Trial Balance, P&L, Balance Sheet, Aged Receivables/Payables, GST Summary, All Reports |
+| **System** | Company Profile, Export / Backup, Settings |
+
+Routes are wired in the sidebar; page UIs will be built phase by phase.
 
 ---
 
@@ -101,12 +119,15 @@ That document covers:
 
 ### Features
 
-- Total receivables / payables
+- Total receivables / payables (from live data)
 - Cash balance overview
 - Recent invoices and expenses
 - Monthly income vs expense chart
 - Quick actions (Create Invoice, Add Expense)
-- Light / Dark theme support
+- Show active company name (partially done via switcher)
+- Light / Dark theme support ✅ already
+
+**Status:** Placeholder UI exists; needs real data after voucher modules.
 
 ---
 
@@ -126,6 +147,8 @@ That document covers:
 - Record payment against invoice
 - Unique invoice number per company
 
+**Status:** ⬜ Not started (sidebar link only)
+
 ---
 
 ## Phase 5 — Expense & Bill Management
@@ -137,7 +160,9 @@ That document covers:
 - Categorize expenses (link to ledgers)
 - Vendor management
 - Bill tracking (accounts payable)
-- Payment recording
+- Payment / receipt vouchers
+
+**Status:** ⬜ Not started (sidebar links only)
 
 ---
 
@@ -145,12 +170,14 @@ That document covers:
 
 ### Features
 
-- View and manage full Chart of Accounts (built on Phase 2 defaults)
+- View and manage full Chart of Accounts (built on Phase 2 defaults) — **data already seeded**
 - Add custom ledgers (no duplicate names)
 - Manual journal entries
-- General ledger view
+- General ledger / ledger statement view
 - Account-wise transaction history
 - Trial balance report
+
+**Status:** ⬜ UI not started; backend seed ✅
 
 ---
 
@@ -158,6 +185,7 @@ That document covers:
 
 ### Essential reports
 
+- Day Book, Cash Book, Bank Book
 - Profit & Loss (P&L)
 - Balance Sheet
 - Cash Flow Statement
@@ -166,27 +194,29 @@ That document covers:
 - Custom date range filters
 - Export to Excel / PDF
 
+**Status:** ⬜ Not started (sidebar links only)
+
 ---
 
 ## Phase 8 — Polish, Testing & Launch Prep
 
 ### Tasks
 
-- Full responsive testing
+- Full responsive testing (mobile sidebar)
 - Performance optimization
 - Error handling and loading states
 - Empty states design
 - Basic unit and integration tests
 - SEO and meta tags
 - Environment variables and production config
-- Deploy on Vercel
+- Deploy on Vercel ✅ already live
 - Optional custom domain
 
 ---
 
 ## Future Phases (Post-Launch)
 
-- Inventory management
+- Inventory management (Stock Items, Godowns — menu reserved)
 - Bank reconciliation and automatic import
 - Recurring invoices
 - Mobile app (React Native / PWA)
@@ -217,7 +247,7 @@ That document covers:
 
 - Mark tasks done by changing status to ✅
 - Focus on **one phase at a time**
-- Before Phase 2 implementation, read **[docs/PHASE2_DESIGN.md](./docs/PHASE2_DESIGN.md)**
+- Phase 2 design: **[docs/PHASE2_DESIGN.md](./docs/PHASE2_DESIGN.md)**
 - After every phase, commit and push to GitHub
 - Keep `THEME.md` and this `ROADMAP.md` up to date
 
