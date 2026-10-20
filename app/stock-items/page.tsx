@@ -328,6 +328,7 @@ export default function StockItemsPage() {
                     <th className="px-4 py-3 font-medium">Name</th>
                     <th className="px-4 py-3 font-medium">Code</th>
                     <th className="px-4 py-3 font-medium">Unit</th>
+                    <th className="px-4 py-3 font-medium text-right">HSN CODE</th>
                     <th className="px-4 py-3 font-medium text-right">GST %</th>
                     <th className="px-4 py-3 font-medium text-right">Op. qty</th>
                     <th className="px-4 py-3 font-medium text-right">Rate</th>
@@ -343,17 +344,15 @@ export default function StockItemsPage() {
                     >
                       <td className="px-4 py-3 font-medium text-[var(--text-primary)]">
                         {item.name}
-                        {item.hsn_sac && (
-                          <span className="ml-2 text-xs text-[var(--text-muted)]">
-                            HSN {item.hsn_sac}
-                          </span>
-                        )}
                       </td>
                       <td className="px-4 py-3 text-[var(--text-secondary)]">
                         {item.code ?? "—"}
                       </td>
                       <td className="px-4 py-3 text-[var(--text-secondary)]">
                         {item.unit}
+                      </td>
+                      <td className="px-4 py-3 text-[var( --text-secondary)]">
+                        {item.hsn_sac}
                       </td>
                       <td className="px-4 py-3 text-right text-[var(--text-primary)]">
                         {Number(item.gst_rate)}%
