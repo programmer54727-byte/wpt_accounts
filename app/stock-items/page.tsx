@@ -175,9 +175,6 @@ export default function StockItemsPage() {
     <AppShell title="Stock Items">
       <div className="space-y-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-[var(--text-muted)]">
-            Opening stock: qty × rate = value. Avg rate later updates from inward only.
-          </p>
           <button
             type="button"
             onClick={() => setShowForm((v) => !v)}
