@@ -29,10 +29,12 @@ Follow the phases in order for best results.
 | Default Chart of Accounts (seed) | ✅ Done |
 | Company switcher | ✅ Done |
 | Database schema (Phase 2 core) | ✅ Done |
+| Dashboard UI (Phase 3) | ✅ Done |
+| Live dashboard totals | ⬜ After vouchers |
 | Core accounting modules (invoices, etc.) | ⬜ Not started |
 | Reports with live data | ⬜ Not started |
 
-**Overall progress:** Phase 0 ✅ · Phase 1 ✅ · Phase 2 ✅ (core) · Phases 3–8 pending
+**Overall progress:** Phase 0 ✅ · Phase 1 ✅ · Phase 2 ✅ · Phase 3 UI ✅ · Phases 4–8 pending
 
 ---
 
@@ -95,7 +97,6 @@ Follow the phases in order for best results.
 
 - `customers` / `vendors` / `tax_rates` tables (before invoice module)
 - Chart of Accounts UI page (`/ledgers`) — full CRUD in Phase 6
-- Live data on dashboard cards (Phase 3)
 
 ---
 
@@ -113,21 +114,26 @@ Routes are wired in the sidebar; page UIs will be built phase by phase.
 
 ---
 
-## Phase 3 — Dashboard
+## Phase 3 — Dashboard ✅ UI COMPLETE
 
 **Goal:** Clear overview for the Accountant (active company).
 
-### Features
+### Completed
 
-- Total receivables / payables (from live data)
-- Cash balance overview
-- Recent invoices and expenses
-- Monthly income vs expense chart
-- Quick actions (Create Invoice, Add Expense)
-- Show active company name (partially done via switcher)
-- Light / Dark theme support ✅ already
+1. ✅ Welcome + active company name
+2. ✅ Stat cards: Receivables, Payables, Income, Expense
+3. ✅ Cash & bank overview block
+4. ✅ Quick actions (invoice, bill, expense, payment, receipt, masters, journal)
+5. ✅ Income vs expense chart placeholder (ready for live data)
+6. ✅ Recent invoices / expenses empty states with CTAs
+7. ✅ Report shortcuts
+8. ✅ Light / Dark theme support
 
-**Status:** Placeholder UI exists; needs real data after voucher modules.
+### Pending (after Phase 4–5 vouchers)
+
+- Live totals from invoices, bills, payments
+- Real chart data
+- Recent lists populated from database
 
 ---
 
