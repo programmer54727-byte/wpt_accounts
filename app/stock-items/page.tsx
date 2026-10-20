@@ -351,7 +351,7 @@ export default function StockItemsPage() {
                       <td className="px-4 py-3 text-[var(--text-secondary)]">
                         {item.unit}
                       </td>
-                      <td className="px-4 py-3 text-[var( --text-secondary)]">
+                      <td className="px-4 py-3 text-[var( --text-primary)]">
                         {item.hsn_sac}
                       </td>
                       <td className="px-4 py-3 text-right text-[var(--text-primary)]">
