@@ -43,14 +43,13 @@ export default function RegisterPage() {
       return;
     }
 
-    router.push("/dashboard");
+    router.push("/select-company");
     router.refresh();
   };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[var(--background)] px-4">
       <div className="w-full max-w-md">
-        {/* Logo */}
         <div className="mb-8 flex flex-col items-center">
           <div className="relative mb-4 h-16 w-16 overflow-hidden rounded-xl">
             <Image
@@ -69,7 +68,6 @@ export default function RegisterPage() {
           </p>
         </div>
 
-        {/* Form */}
         <form
           onSubmit={handleRegister}
           className="rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm"
