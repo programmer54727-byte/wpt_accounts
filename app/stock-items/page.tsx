@@ -26,6 +26,7 @@ export default function StockItemsPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
@@ -97,6 +98,7 @@ export default function StockItemsPage() {
   };
 
   const resetForm = () => {
+    setEditingId(null);
     setName("");
     setCode("");
     setItemType("goods");
@@ -110,7 +112,24 @@ export default function StockItemsPage() {
     setShowForm(false);
   };
 
-  const handleCreate = async (e: React.FormEvent) => {
+  const startEdit = (item: StockItem) => {
+    setEditingId(item.id);
+    setName(item.name);
+    setCode(item.code ?? "");
+    setItemType(item.item_type === "service" ? "service" : "goods");
+    setUnit(item.unit || "Nos");
+    setHsn(item.hsn_sac ?? "");
+    setGstRate(String(item.gst_rate ?? 0));
+    setOpeningQty(String(item.opening_qty ?? 0));
+    setAvgRate(String(item.avg_rate ?? 0));
+    setOpeningValue(String(item.opening_value ?? 0));
+    setValueManual(true);
+    setShowForm(true);
+    setError(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!companyId || !name.trim()) return;
 
@@ -128,9 +147,7 @@ export default function StockItemsPage() {
     const rate = Number(avgRate) || 0;
     const value = valueManual ? Number(openingValue) || 0 : qty * rate;
 
-    const supabase = createClient();
-    const { error } = await supabase.from("stock_items").insert({
-      company_id: companyId,
+    const payload = {
       name: name.trim(),
       code: code.trim() || null,
       item_type: itemType,
@@ -140,7 +157,25 @@ export default function StockItemsPage() {
       avg_rate: rate,
       opening_qty: qty,
       opening_value: value,
-    });
+    };
+
+    const supabase = createClient();
+    let error;
+
+    if (editingId) {
+      const res = await supabase
+        .from("stock_items")
+        .update(payload)
+        .eq("id", editingId)
+        .eq("company_id", companyId);
+      error = res.error;
+    } else {
+      const res = await supabase.from("stock_items").insert({
+        company_id: companyId,
+        ...payload,
+      });
+      error = res.error;
+    }
 
     setSaving(false);
 
@@ -149,10 +184,6 @@ export default function StockItemsPage() {
         setError("An item with this name already exists in this company.");
       } else if (error.message.includes("stock_items_code_unique")) {
         setError("An item with this code already exists in this company.");
-      } else if (error.message.includes("sale_rate") || error.message.includes("purchase_rate")) {
-        setError(
-          "Database still has old columns. Run phase4_drop_sale_purchase_rates.sql in Supabase."
-        );
       } else {
         setError(error.message);
       }
@@ -168,7 +199,10 @@ export default function StockItemsPage() {
     const supabase = createClient();
     const { error } = await supabase.from("stock_items").delete().eq("id", id);
     if (error) setError(error.message);
-    else await load();
+    else {
+      if (editingId === id) resetForm();
+      await load();
+    }
   };
 
   return (
@@ -177,7 +211,13 @@ export default function StockItemsPage() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <button
             type="button"
-            onClick={() => setShowForm((v) => !v)}
+            onClick={() => {
+              if (showForm) resetForm();
+              else {
+                setEditingId(null);
+                setShowForm(true);
+              }
+            }}
             className="rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--primary-hover)]"
           >
             {showForm ? "Cancel" : "+ Add item"}
@@ -192,9 +232,13 @@ export default function StockItemsPage() {
 
         {showForm && (
           <form
-            onSubmit={handleCreate}
+            onSubmit={handleSubmit}
             className="space-y-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4"
           >
+            <p className="text-sm font-medium text-[var(--text-primary)]">
+              {editingId ? "Edit item" : "New item"}
+            </p>
+
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               <Field label="Name *">
                 <input
@@ -299,17 +343,32 @@ export default function StockItemsPage() {
                 </Field>
               </div>
               <p className="mt-2 text-xs text-[var(--text-muted)]">
-                Value auto = qty × rate. Edit value to override. Rate becomes starting avg rate.
+                Value auto = qty × rate. Edit value to override.
               </p>
             </div>
 
-            <button
-              type="submit"
-              disabled={saving || !companyId}
-              className="rounded-lg bg-[var(--primary)] px-4 py-2.5 text-sm font-medium text-white hover:bg-[var(--primary-hover)] disabled:opacity-60"
-            >
-              {saving ? "Saving…" : "Save item"}
-            </button>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="submit"
+                disabled={saving || !companyId}
+                className="rounded-lg bg-[var(--primary)] px-4 py-2.5 text-sm font-medium text-white hover:bg-[var(--primary-hover)] disabled:opacity-60"
+              >
+                {saving
+                  ? "Saving…"
+                  : editingId
+                    ? "Update item"
+                    : "Save item"}
+              </button>
+              {editingId && (
+                <button
+                  type="button"
+                  onClick={resetForm}
+                  className="rounded-lg border border-[var(--border)] px-4 py-2.5 text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--background)]"
+                >
+                  Cancel edit
+                </button>
+              )}
+            </div>
           </form>
         )}
 
@@ -333,14 +392,18 @@ export default function StockItemsPage() {
                     <th className="px-4 py-3 text-right font-medium">Op. qty</th>
                     <th className="px-4 py-3 text-right font-medium">Rate</th>
                     <th className="px-4 py-3 text-right font-medium">Op. value</th>
-                    <th className="px-4 py-3 text-right font-medium w-16" />
+                    <th className="px-4 py-3 text-right font-medium whitespace-nowrap">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {items.map((item) => (
                     <tr
                       key={item.id}
-                      className="border-b border-[var(--border)] last:border-0"
+                      className={`border-b border-[var(--border)] last:border-0 ${
+                        editingId === item.id ? "bg-[var(--background)]" : ""
+                      }`}
                     >
                       <td className="px-4 py-3 text-left font-medium text-[var(--text-primary)]">
                         {item.name}
@@ -366,14 +429,23 @@ export default function StockItemsPage() {
                       <td className="px-4 py-3 text-right whitespace-nowrap text-[var(--text-primary)]">
                         ₹{Number(item.opening_value || 0).toFixed(2)}
                       </td>
-                      <td className="px-4 py-3 text-right">
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(item.id)}
-                          className="text-xs text-[var(--danger)] hover:underline"
-                        >
-                          Delete
-                        </button>
+                      <td className="px-4 py-3 text-right whitespace-nowrap">
+                        <div className="flex items-center justify-end gap-3">
+                          <button
+                            type="button"
+                            onClick={() => startEdit(item)}
+                            className="text-xs font-medium text-[var(--primary)] hover:underline"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(item.id)}
+                            className="text-xs text-[var(--danger)] hover:underline"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
