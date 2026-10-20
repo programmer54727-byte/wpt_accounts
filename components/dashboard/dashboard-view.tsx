@@ -16,8 +16,6 @@ export function DashboardView() {
       const supabase = createClient();
       const stored = localStorage.getItem(STORAGE_KEY);
 
-      let query = supabase.from("companies").select("*").order("name").limit(1);
-
       if (stored) {
         const { data } = await supabase
           .from("companies")
@@ -31,7 +29,11 @@ export function DashboardView() {
         }
       }
 
-      const { data } = await query;
+      const { data } = await supabase
+        .from("companies")
+        .select("*")
+        .order("name")
+        .limit(1);
       if (data && data[0]) {
         setCompany(data[0] as Company);
         localStorage.setItem(STORAGE_KEY, data[0].id);
@@ -46,7 +48,6 @@ export function DashboardView() {
 
   return (
     <div className="space-y-6">
-      {/* Welcome */}
       <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h2 className="text-xl font-semibold text-[var(--text-primary)]">
@@ -60,11 +61,10 @@ export function DashboardView() {
           </p>
         </div>
         <p className="text-xs text-[var(--text-muted)]">
-          Figures update when you add invoices, bills and expenses.
+          Figures update when you add invoices, bills and payments.
         </p>
       </div>
 
-      {/* Stat cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           title="Receivables"
@@ -90,13 +90,12 @@ export function DashboardView() {
         <StatCard
           title="Expense (this month)"
           value="₹0"
-          subtitle="Bills & expenses"
+          subtitle="Bills & payments"
           accent="border-l-[var(--warning)]"
           valueClass="text-[var(--warning)]"
         />
       </div>
 
-      {/* Cash + quick actions */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5 lg:col-span-1">
           <p className="text-xs font-medium text-[var(--text-muted)]">
@@ -121,18 +120,17 @@ export function DashboardView() {
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
             <Action href="/invoices" label="New Sales Invoice" />
             <Action href="/bills" label="New Purchase Bill" />
-            <Action href="/expenses" label="Add Expense" />
-            <Action href="/receipts" label="Record Receipt" />
             <Action href="/payments" label="Record Payment" />
+            <Action href="/receipts" label="Record Receipt" />
+            <Action href="/journals" label="Journal Entry" />
             <Action href="/customers" label="Add Customer" />
             <Action href="/vendors" label="Add Vendor" />
             <Action href="/ledgers" label="Chart of Accounts" />
-            <Action href="/journals" label="Journal Entry" />
+            <Action href="/contra" label="Contra" />
           </div>
         </div>
       </div>
 
-      {/* Chart placeholder */}
       <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-[var(--text-primary)]">
@@ -145,9 +143,8 @@ export function DashboardView() {
             Chart will appear when you have transactions
           </p>
           <p className="mt-1 text-xs text-[var(--text-muted)]">
-            (Phase 4+ vouchers → live chart)
+            (Voucher modules → live chart)
           </p>
-          {/* Simple visual bars placeholder */}
           <div className="mt-6 flex items-end gap-3">
             {[40, 65, 30, 80, 50, 70, 45].map((h, i) => (
               <div key={i} className="flex flex-col items-center gap-1">
@@ -164,7 +161,6 @@ export function DashboardView() {
         </div>
       </div>
 
-      {/* Recent lists */}
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <EmptyList
           title="Recent invoices"
@@ -173,14 +169,13 @@ export function DashboardView() {
           ctaHref="/invoices"
         />
         <EmptyList
-          title="Recent expenses & bills"
-          description="No expenses or bills recorded yet."
-          ctaLabel="Add expense"
-          ctaHref="/expenses"
+          title="Recent bills & payments"
+          description="No purchase bills or payments recorded yet."
+          ctaLabel="New purchase bill"
+          ctaHref="/bills"
         />
       </div>
 
-      {/* Reports shortcuts */}
       <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-5">
         <p className="mb-3 text-sm font-semibold text-[var(--text-primary)]">
           Reports
