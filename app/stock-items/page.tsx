@@ -14,6 +14,8 @@ type StockItem = {
   hsn_sac: string | null;
   avg_rate: number;
   gst_rate: number;
+  opening_qty: number;
+  opening_value: number;
   is_active: boolean;
 };
 
@@ -30,8 +32,11 @@ export default function StockItemsPage() {
   const [itemType, setItemType] = useState<"goods" | "service">("goods");
   const [unit, setUnit] = useState("Nos");
   const [hsn, setHsn] = useState("");
-  const [avgRate, setAvgRate] = useState("0");
   const [gstRate, setGstRate] = useState("5");
+  const [openingQty, setOpeningQty] = useState("0");
+  const [avgRate, setAvgRate] = useState("0");
+  const [openingValue, setOpeningValue] = useState("0");
+  const [valueManual, setValueManual] = useState(false);
 
   const resolveCompany = useCallback(async () => {
     const supabase = createClient();
@@ -69,7 +74,9 @@ export default function StockItemsPage() {
     const supabase = createClient();
     const { data, error } = await supabase
       .from("stock_items")
-      .select("id, name, code, item_type, unit, hsn_sac, avg_rate, gst_rate, is_active")
+      .select(
+        "id, name, code, item_type, unit, hsn_sac, avg_rate, gst_rate, opening_qty, opening_value, is_active"
+      )
       .eq("company_id", id)
       .order("name");
 
@@ -82,14 +89,24 @@ export default function StockItemsPage() {
     load();
   }, [load]);
 
+  const recalcValue = (qtyStr: string, rateStr: string) => {
+    if (valueManual) return;
+    const q = Number(qtyStr) || 0;
+    const r = Number(rateStr) || 0;
+    setOpeningValue((q * r).toFixed(2));
+  };
+
   const resetForm = () => {
     setName("");
     setCode("");
     setItemType("goods");
     setUnit("Nos");
     setHsn("");
-    setAvgRate("0");
     setGstRate("5");
+    setOpeningQty("0");
+    setAvgRate("0");
+    setOpeningValue("0");
+    setValueManual(false);
     setShowForm(false);
   };
 
@@ -107,7 +124,9 @@ export default function StockItemsPage() {
       return;
     }
 
+    const qty = Number(openingQty) || 0;
     const rate = Number(avgRate) || 0;
+    const value = valueManual ? Number(openingValue) || 0 : qty * rate;
 
     const supabase = createClient();
     const { error } = await supabase.from("stock_items").insert({
@@ -117,11 +136,10 @@ export default function StockItemsPage() {
       item_type: itemType,
       unit: unit.trim() || "Nos",
       hsn_sac: hsn.trim() || null,
-      avg_rate: rate,
-      // keep legacy columns in sync
-      sale_rate: rate,
-      purchase_rate: rate,
       gst_rate: gst,
+      avg_rate: rate,
+      opening_qty: qty,
+      opening_value: value,
     });
 
     setSaving(false);
@@ -131,6 +149,10 @@ export default function StockItemsPage() {
         setError("An item with this name already exists in this company.");
       } else if (error.message.includes("stock_items_code_unique")) {
         setError("An item with this code already exists in this company.");
+      } else if (error.message.includes("sale_rate") || error.message.includes("purchase_rate")) {
+        setError(
+          "Database still has old columns. Run phase4_drop_sale_purchase_rates.sql in Supabase."
+        );
       } else {
         setError(error.message);
       }
@@ -154,7 +176,7 @@ export default function StockItemsPage() {
       <div className="space-y-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-[var(--text-muted)]">
-            Avg rate from opening + inward only. Outward does not change average.
+            Opening stock: qty × rate = value. Avg rate later updates from inward only.
           </p>
           <button
             type="button"
@@ -174,82 +196,123 @@ export default function StockItemsPage() {
         {showForm && (
           <form
             onSubmit={handleCreate}
-            className="grid grid-cols-1 gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 sm:grid-cols-2 lg:grid-cols-3"
+            className="space-y-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4"
           >
-            <Field label="Name *">
-              <input
-                required
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className={inputClass}
-                placeholder="Item name"
-              />
-            </Field>
-            <Field label="Code / SKU">
-              <input
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                className={inputClass}
-                placeholder="Optional"
-              />
-            </Field>
-            <Field label="Type">
-              <select
-                value={itemType}
-                onChange={(e) => setItemType(e.target.value as "goods" | "service")}
-                className={inputClass}
-              >
-                <option value="goods">Goods</option>
-                <option value="service">Service</option>
-              </select>
-            </Field>
-            <Field label="Unit">
-              <input
-                value={unit}
-                onChange={(e) => setUnit(e.target.value)}
-                className={inputClass}
-                placeholder="Nos, Kg, Hrs…"
-              />
-            </Field>
-            <Field label="HSN / SAC">
-              <input
-                value={hsn}
-                onChange={(e) => setHsn(e.target.value)}
-                className={inputClass}
-              />
-            </Field>
-            <Field label="GST rate (%)">
-              <input
-                type="number"
-                min="0"
-                max="100"
-                step="0.01"
-                value={gstRate}
-                onChange={(e) => setGstRate(e.target.value)}
-                className={inputClass}
-                placeholder="e.g. 5, 18"
-              />
-            </Field>
-            <Field label="Avg / closing rate (₹)">
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                value={avgRate}
-                onChange={(e) => setAvgRate(e.target.value)}
-                className={inputClass}
-                placeholder="Opening + inward average"
-              />
-            </Field>
-            <div className="flex items-end sm:col-span-2 lg:col-span-3">
-              <button
-                type="submit"
-                disabled={saving || !companyId}
-                className="rounded-lg bg-[var(--primary)] px-4 py-2.5 text-sm font-medium text-white hover:bg-[var(--primary-hover)] disabled:opacity-60"
-              >
-                {saving ? "Saving…" : "Save item"}
-              </button>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <Field label="Name *">
+                <input
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className={inputClass}
+                  placeholder="Item name"
+                />
+              </Field>
+              <Field label="Code / SKU">
+                <input
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  className={inputClass}
+                  placeholder="Optional"
+                />
+              </Field>
+              <Field label="Type">
+                <select
+                  value={itemType}
+                  onChange={(e) => setItemType(e.target.value as "goods" | "service")}
+                  className={inputClass}
+                >
+                  <option value="goods">Goods</option>
+                  <option value="service">Service</option>
+                </select>
+              </Field>
+              <Field label="Unit">
+                <input
+                  value={unit}
+                  onChange={(e) => setUnit(e.target.value)}
+                  className={inputClass}
+                  placeholder="Nos, Kg, Hrs…"
+                />
+              </Field>
+              <Field label="HSN / SAC">
+                <input
+                  value={hsn}
+                  onChange={(e) => setHsn(e.target.value)}
+                  className={inputClass}
+                />
+              </Field>
+              <Field label="GST rate (%)">
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  value={gstRate}
+                  onChange={(e) => setGstRate(e.target.value)}
+                  className={inputClass}
+                  placeholder="e.g. 5, 18"
+                />
+              </Field>
             </div>
+
+            {/* Opening stock */}
+            <div className="rounded-lg border border-[var(--border)] bg-[var(--background)] p-3">
+              <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                Opening stock
+              </p>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                <Field label="Opening qty">
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.001"
+                    value={openingQty}
+                    onChange={(e) => {
+                      setOpeningQty(e.target.value);
+                      recalcValue(e.target.value, avgRate);
+                    }}
+                    className={inputClass}
+                  />
+                </Field>
+                <Field label="Rate (₹)">
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={avgRate}
+                    onChange={(e) => {
+                      setAvgRate(e.target.value);
+                      recalcValue(openingQty, e.target.value);
+                    }}
+                    className={inputClass}
+                  />
+                </Field>
+                <Field label="Total value (₹)">
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={openingValue}
+                    onChange={(e) => {
+                      setValueManual(true);
+                      setOpeningValue(e.target.value);
+                    }}
+                    className={inputClass}
+                  />
+                </Field>
+              </div>
+              <p className="mt-2 text-xs text-[var(--text-muted)]">
+                Value auto = qty × rate. Edit value to override. Rate becomes starting avg rate.
+              </p>
+            </div>
+
+            <button
+              type="submit"
+              disabled={saving || !companyId}
+              className="rounded-lg bg-[var(--primary)] px-4 py-2.5 text-sm font-medium text-white hover:bg-[var(--primary-hover)] disabled:opacity-60"
+            >
+              {saving ? "Saving…" : "Save item"}
+            </button>
           </form>
         )}
 
@@ -262,15 +325,16 @@ export default function StockItemsPage() {
             </p>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[640px] text-left text-sm">
+              <table className="w-full min-w-[720px] text-left text-sm">
                 <thead className="border-b border-[var(--border)] bg-[var(--background)] text-xs text-[var(--text-muted)]">
                   <tr>
                     <th className="px-4 py-3 font-medium">Name</th>
                     <th className="px-4 py-3 font-medium">Code</th>
-                    <th className="px-4 py-3 font-medium">Type</th>
                     <th className="px-4 py-3 font-medium">Unit</th>
                     <th className="px-4 py-3 font-medium text-right">GST %</th>
-                    <th className="px-4 py-3 font-medium text-right">Avg rate</th>
+                    <th className="px-4 py-3 font-medium text-right">Op. qty</th>
+                    <th className="px-4 py-3 font-medium text-right">Rate</th>
+                    <th className="px-4 py-3 font-medium text-right">Op. value</th>
                     <th className="px-4 py-3 font-medium" />
                   </tr>
                 </thead>
@@ -291,9 +355,6 @@ export default function StockItemsPage() {
                       <td className="px-4 py-3 text-[var(--text-secondary)]">
                         {item.code ?? "—"}
                       </td>
-                      <td className="px-4 py-3 capitalize text-[var(--text-secondary)]">
-                        {item.item_type}
-                      </td>
                       <td className="px-4 py-3 text-[var(--text-secondary)]">
                         {item.unit}
                       </td>
@@ -301,7 +362,13 @@ export default function StockItemsPage() {
                         {Number(item.gst_rate)}%
                       </td>
                       <td className="px-4 py-3 text-right text-[var(--text-primary)]">
+                        {Number(item.opening_qty)}
+                      </td>
+                      <td className="px-4 py-3 text-right text-[var(--text-primary)]">
                         ₹{Number(item.avg_rate || 0).toFixed(2)}
+                      </td>
+                      <td className="px-4 py-3 text-right text-[var(--text-primary)]">
+                        ₹{Number(item.opening_value || 0).toFixed(2)}
                       </td>
                       <td className="px-4 py-3 text-right">
                         <button
