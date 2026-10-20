@@ -163,9 +163,7 @@ const icon = {
 const sections: NavSection[] = [
   {
     title: "Overview",
-    items: [
-      { label: "Dashboard", href: "/dashboard", icon: icon.dashboard },
-    ],
+    items: [{ label: "Dashboard", href: "/dashboard", icon: icon.dashboard }],
   },
   {
     title: "Masters",
@@ -218,7 +216,12 @@ const sections: NavSection[] = [
   },
 ];
 
-export function Sidebar() {
+type SidebarProps = {
+  mobileOpen?: boolean;
+  onClose?: () => void;
+};
+
+export function Sidebar({ mobileOpen = false, onClose }: SidebarProps) {
   const pathname = usePathname();
 
   const isActive = (href: string) => {
@@ -229,21 +232,50 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="fixed left-0 top-0 z-40 flex h-screen w-64 flex-col border-r border-[var(--border)] bg-[var(--surface)]">
-      <div className="flex h-16 shrink-0 items-center gap-3 border-b border-[var(--border)] px-5">
-        <div className="relative h-9 w-9 overflow-hidden rounded-md">
-          <Image
-            src="/wpt-logo.jpg"
-            alt="WPT Accounts"
-            fill
-            className="object-cover"
-            priority
-          />
+    <aside
+      className={`fixed left-0 top-0 z-50 flex h-screen w-64 flex-col border-r border-[var(--border)] bg-[var(--surface)] transition-transform duration-200 ease-out lg:z-40 lg:translate-x-0 ${
+        mobileOpen ? "translate-x-0" : "-translate-x-full"
+      }`}
+    >
+      <div className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-[var(--border)] px-4 sm:h-16 sm:px-5">
+        <div className="flex items-center gap-3">
+          <div className="relative h-9 w-9 overflow-hidden rounded-md">
+            <Image
+              src="/wpt-logo.jpg"
+              alt="WPT Accounts"
+              fill
+              className="object-cover"
+              priority
+            />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-sm font-bold tracking-tight">WPT Accounts</span>
+            <span className="text-[10px] text-[var(--text-muted)]">Web Power Tech</span>
+          </div>
         </div>
-        <div className="flex flex-col">
-          <span className="text-sm font-bold tracking-tight">WPT Accounts</span>
-          <span className="text-[10px] text-[var(--text-muted)]">Web Power Tech</span>
-        </div>
+
+        {/* Close on mobile */}
+        <button
+          type="button"
+          onClick={onClose}
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--text-muted)] hover:bg-[var(--background)] hover:text-[var(--text-primary)] lg:hidden"
+          aria-label="Close menu"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M18 6 6 18" />
+            <path d="m6 6 12 12" />
+          </svg>
+        </button>
       </div>
 
       <nav className="flex-1 overflow-y-auto p-3">
@@ -259,6 +291,7 @@ export function Sidebar() {
                   <Link
                     key={item.href}
                     href={item.href}
+                    onClick={onClose}
                     className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                       active
                         ? "bg-[var(--primary)] text-white"
