@@ -31,9 +31,9 @@ export default function StockItemsPage() {
   const [itemType, setItemType] = useState<"goods" | "service">("goods");
   const [unit, setUnit] = useState("Nos");
   const [hsn, setHsn] = useState("");
-  const [saleRate, setSaleRate] = useState("0");
-  const [purchaseRate, setPurchaseRate] = useState("0");
-  const [gstRate, setGstRate] = useState("18");
+  /** Opening / avg rate (from inward & opening only; outward ignored). */
+  const [avgRate, setAvgRate] = useState("0");
+  const [gstRate, setGstRate] = useState("5");
 
   const resolveCompany = useCallback(async () => {
     const supabase = createClient();
@@ -92,9 +92,8 @@ export default function StockItemsPage() {
     setItemType("goods");
     setUnit("Nos");
     setHsn("");
-    setSaleRate("0");
-    setPurchaseRate("0");
-    setGstRate("18");
+    setAvgRate("0");
+    setGstRate("5");
     setShowForm(false);
   };
 
@@ -112,6 +111,10 @@ export default function StockItemsPage() {
       return;
     }
 
+    const rate = Number(avgRate) || 0;
+
+    // Store same value in sale_rate & purchase_rate for now.
+    // Later: avg rate = weighted average of opening + inward only (outward ignored).
     const supabase = createClient();
     const { error } = await supabase.from("stock_items").insert({
       company_id: companyId,
@@ -120,8 +123,8 @@ export default function StockItemsPage() {
       item_type: itemType,
       unit: unit.trim() || "Nos",
       hsn_sac: hsn.trim() || null,
-      sale_rate: Number(saleRate) || 0,
-      purchase_rate: Number(purchaseRate) || 0,
+      sale_rate: rate,
+      purchase_rate: rate,
       gst_rate: gst,
     });
 
@@ -150,12 +153,17 @@ export default function StockItemsPage() {
     else await load();
   };
 
+  /** Display avg rate (prefer purchase_rate as stock cost base). */
+  const displayRate = (item: StockItem) =>
+    Number(item.purchase_rate || item.sale_rate || 0);
+
   return (
     <AppShell title="Stock Items">
       <div className="space-y-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-[var(--text-muted)]">
-            Products and services used on sales and purchase vouchers.
+            Products and services for sales and purchase. Rate is average from
+            opening + inward (outward does not change average).
           </p>
           <button
             type="button"
@@ -220,38 +228,32 @@ export default function StockItemsPage() {
               />
             </Field>
             <Field label="GST rate (%)">
-              <select
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="0.01"
                 value={gstRate}
                 onChange={(e) => setGstRate(e.target.value)}
                 className={inputClass}
-              >
-                <option value="0">0%</option>
-                <option value="5">5%</option>
-                <option value="12">12%</option>
-                <option value="18">18%</option>
-                <option value="28">28%</option>
-              </select>
+                placeholder="e.g. 5, 18"
+              />
             </Field>
-            <Field label="Sale rate">
+            <Field label="Avg / closing rate (₹)">
               <input
                 type="number"
                 min="0"
                 step="0.01"
-                value={saleRate}
-                onChange={(e) => setSaleRate(e.target.value)}
+                value={avgRate}
+                onChange={(e) => setAvgRate(e.target.value)}
                 className={inputClass}
+                placeholder="From opening + inward"
               />
             </Field>
-            <Field label="Purchase rate">
-              <input
-                type="number"
-                min="0"
-                step="0.01"
-                value={purchaseRate}
-                onChange={(e) => setPurchaseRate(e.target.value)}
-                className={inputClass}
-              />
-            </Field>
+            <p className="text-xs text-[var(--text-muted)] sm:col-span-2 lg:col-span-3">
+              Later this rate will auto-update from stock inward and opening only.
+              Sales outward will not change the average rate.
+            </p>
             <div className="flex items-end sm:col-span-2 lg:col-span-3">
               <button
                 type="submit"
@@ -273,7 +275,7 @@ export default function StockItemsPage() {
             </p>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[720px] text-left text-sm">
+              <table className="w-full min-w-[640px] text-left text-sm">
                 <thead className="border-b border-[var(--border)] bg-[var(--background)] text-xs text-[var(--text-muted)]">
                   <tr>
                     <th className="px-4 py-3 font-medium">Name</th>
@@ -281,8 +283,7 @@ export default function StockItemsPage() {
                     <th className="px-4 py-3 font-medium">Type</th>
                     <th className="px-4 py-3 font-medium">Unit</th>
                     <th className="px-4 py-3 font-medium text-right">GST %</th>
-                    <th className="px-4 py-3 font-medium text-right">Sale</th>
-                    <th className="px-4 py-3 font-medium text-right">Purchase</th>
+                    <th className="px-4 py-3 font-medium text-right">Avg rate</th>
                     <th className="px-4 py-3 font-medium" />
                   </tr>
                 </thead>
@@ -313,10 +314,7 @@ export default function StockItemsPage() {
                         {Number(item.gst_rate)}%
                       </td>
                       <td className="px-4 py-3 text-right text-[var(--text-primary)]">
-                        ₹{Number(item.sale_rate).toFixed(2)}
-                      </td>
-                      <td className="px-4 py-3 text-right text-[var(--text-primary)]">
-                        ₹{Number(item.purchase_rate).toFixed(2)}
+                        ₹{displayRate(item).toFixed(2)}
                       </td>
                       <td className="px-4 py-3 text-right">
                         <button
