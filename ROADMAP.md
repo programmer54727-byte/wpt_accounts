@@ -9,6 +9,8 @@ Follow the phases in order for best results.
 This application has **only one role — Accountant**.  
 There are no Admin / Viewer / multi-role permissions. Every logged-in user is an Accountant with full access to the system.
 
+**Multi-company:** Supported from Phase 2. See design doc below.
+
 ---
 
 ## Current Status (as of October 2026)
@@ -22,8 +24,8 @@ There are no Admin / Viewer / multi-role permissions. Every logged-in user is an
 | Project structure       | ✅ Done         |
 | Theme (Light/Dark)      | ✅ Done         |
 | App Shell (Sidebar)     | ✅ Done         |
-| Authentication          | ⬜ Not started  |
-| Database / Supabase     | ⬜ Not started  |
+| Authentication          | ✅ Done         |
+| Database / Supabase     | ⬜ Phase 2      |
 | Core Accounting modules | ⬜ Not started  |
 
 ---
@@ -43,59 +45,60 @@ There are no Admin / Viewer / multi-role permissions. Every logged-in user is an
 7. ✅ Logo integration
 8. ✅ Deployed on Vercel
 
-**Note:** shadcn/ui can be added later when needed for forms/tables.
-
 ---
 
-## Phase 1 — Authentication (Week 2)
+## Phase 1 — Authentication ✅ COMPLETE
 
 **Goal:** Secure login system using Supabase Auth.  
 **Role:** Only Accountant (single role system)
 
-### Steps:
+### Completed:
 
-1. Create Supabase project
-2. Configure Authentication (Email + Google provider)
-3. Create Auth pages:
-   - Login
-   - Register / Sign up
-   - Forgot Password
-   - Reset Password
-4. Protect routes (middleware)
-5. Basic user profile page
-6. No role system needed — every user is an Accountant with full access
+1. ✅ Supabase project (via Vercel integration)
+2. ✅ Email auth (Login + Register)
+3. ✅ Route protection (middleware)
+4. ✅ Logout
+5. ✅ Dashboard accessible only when logged in
 
 ---
 
-## Phase 2 — Database & Core Schema (Week 2–3)
+## Phase 2 — Database, Multi-Company & Default Ledgers
 
-**Goal:** Solid database design for accounting.
+**Goal:** Multi-company setup, Tally-style default Chart of Accounts, no duplicates.
 
-### Key Tables to design:
+### Design Document (READ FIRST)
 
-- `companies` (or single company setup)
-- `users` (linked to Supabase Auth) — all users are Accountants
-- `chart_of_accounts`
-- `customers` / `vendors`
-- `invoices` + `invoice_items`
-- `expenses` / `bills`
-- `transactions` / `journal_entries`
-- `payments`
-- `tax_rates` (GST focused for India)
+👉 **[docs/PHASE2_DESIGN.md](./docs/PHASE2_DESIGN.md)**
 
-### Steps:
+Is document me detail hai:
 
-1. Design full database schema
-2. Write SQL migrations / Supabase schema
-3. Enable Row Level Security (RLS)
-4. Create TypeScript types from schema
-5. Setup Supabase client in the app
+- Login ke baad company create / select flow
+- Multi-company tables (`companies`, `company_members`)
+- Tally-style **default ledgers** (auto-create on new company)
+- **No duplicate** rules (ledger, customer, vendor, invoice no.)
+- RLS + data isolation per company
+- Implementation order
+
+### Key deliverables
+
+1. Schema: companies, company_members, chart_of_accounts (groups + ledgers)
+2. Onboarding UI: create first company after login
+3. Select-company UI (multiple companies)
+4. Seed default ledgers (Cash, Bank, Sales, Purchase, CGST, SGST, IGST, …)
+5. Uniqueness constraints in DB + app validation
+6. Active company context for entire app
+
+### Also prepare for later modules
+
+- customers / vendors tables (with unique per company)
+- tax_rates
+- Foundation for invoices / expenses (full modules in Phase 4–5)
 
 ---
 
 ## Phase 3 — Dashboard (Week 3)
 
-**Goal:** Beautiful and useful overview for the Accountant.
+**Goal:** Beautiful and useful overview for the Accountant (active company).
 
 ### Features:
 
@@ -122,6 +125,7 @@ There are no Admin / Viewer / multi-role permissions. Every logged-in user is an
 - Generate PDF
 - Send invoice via email
 - Record payment against invoice
+- Unique invoice number per company
 
 ---
 
@@ -131,7 +135,7 @@ There are no Admin / Viewer / multi-role permissions. Every logged-in user is an
 
 - Record expenses
 - Upload receipts
-- Categorize expenses
+- Categorize expenses (link to ledgers)
 - Vendor management
 - Bill tracking (Accounts Payable)
 - Payment recording
@@ -142,7 +146,8 @@ There are no Admin / Viewer / multi-role permissions. Every logged-in user is an
 
 ### Features:
 
-- Full Chart of Accounts (Assets, Liabilities, Equity, Income, Expenses)
+- View / manage full Chart of Accounts (built on Phase 2 defaults)
+- Add custom ledgers (no duplicate names)
 - Manual Journal Entries
 - General Ledger view
 - Account-wise transaction history
@@ -182,7 +187,6 @@ There are no Admin / Viewer / multi-role permissions. Every logged-in user is an
 
 ## Future Phases (Post-Launch)
 
-- Multi-company support
 - Inventory management
 - Bank reconciliation + automatic import
 - Recurring invoices
@@ -203,6 +207,7 @@ There are no Admin / Viewer / multi-role permissions. Every logged-in user is an
 | Backend / DB      | Supabase (PostgreSQL)         |
 | Auth              | Supabase Auth                 |
 | Role              | Single Role — Accountant      |
+| Multi-company     | Yes (Phase 2)                 |
 | PDF Generation    | @react-pdf/renderer or similar|
 | Charts            | Recharts or Chart.js          |
 | Deployment        | Vercel                        |
@@ -213,6 +218,7 @@ There are no Admin / Viewer / multi-role permissions. Every logged-in user is an
 
 - Mark tasks as done by changing `⬜` → `✅`
 - Focus on **one phase at a time**
+- Phase 2 se pehle **[docs/PHASE2_DESIGN.md](./docs/PHASE2_DESIGN.md)** padho
 - After every phase, commit and push to GitHub
 - Keep `THEME.md` and this `ROADMAP.md` updated
 
