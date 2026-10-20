@@ -120,12 +120,6 @@ Structure follows Tally: **Groups → Ledgers**
 | Bank Account | Bank Accounts | Placeholder — user can rename or add more |
 | Sales | Sales Accounts | Default sales |
 | Purchase | Purchase Accounts | Default purchase |
-| CGST | Duties & Taxes | GST |
-| SGST | Duties & Taxes | GST |
-| IGST | Duties & Taxes | GST |
-| Input CGST | Duties & Taxes | Input tax credit |
-| Input SGST | Duties & Taxes | Input tax credit |
-| Input IGST | Duties & Taxes | Input tax credit |
 | Round Off | Indirect Expenses | Invoice round-off |
 | Discount Allowed | Indirect Expenses | |
 | Discount Received | Indirect Incomes | |
