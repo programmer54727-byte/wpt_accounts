@@ -38,6 +38,9 @@ create table if not exists public.stock_items (
   hsn_sac text,
   sale_rate numeric(14, 2) not null default 0 check (sale_rate >= 0),
   purchase_rate numeric(14, 2) not null default 0 check (purchase_rate >= 0),
+  -- GST % on this item (e.g. 0, 5, 12, 18, 28)
+  gst_rate numeric(8, 3) not null default 0
+    check (gst_rate >= 0 and gst_rate <= 100),
   tax_rate_id uuid references public.tax_rates (id) on delete set null,
   opening_qty numeric(14, 3) not null default 0,
   opening_value numeric(14, 2) not null default 0,
@@ -48,6 +51,21 @@ create table if not exists public.stock_items (
   constraint stock_items_name_unique unique (company_id, name),
   constraint stock_items_code_unique unique (company_id, code)
 );
+
+-- If table already existed without gst_rate, add the column
+do $$
+begin
+  if not exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'stock_items'
+      and column_name = 'gst_rate'
+  ) then
+    alter table public.stock_items
+      add column gst_rate numeric(8, 3) not null default 0
+        check (gst_rate >= 0 and gst_rate <= 100);
+  end if;
+end $$;
 
 create index if not exists stock_items_company_id_idx on public.stock_items (company_id);
 create index if not exists stock_items_tax_rate_id_idx on public.stock_items (tax_rate_id);
@@ -139,7 +157,6 @@ alter table public.stock_items enable row level security;
 alter table public.customers enable row level security;
 alter table public.vendors enable row level security;
 
--- tax_rates
 drop policy if exists tax_rates_select on public.tax_rates;
 create policy tax_rates_select on public.tax_rates
   for select to authenticated
@@ -161,7 +178,6 @@ create policy tax_rates_delete on public.tax_rates
   for delete to authenticated
   using (public.is_company_member(company_id));
 
--- stock_items
 drop policy if exists stock_items_select on public.stock_items;
 create policy stock_items_select on public.stock_items
   for select to authenticated
@@ -183,7 +199,6 @@ create policy stock_items_delete on public.stock_items
   for delete to authenticated
   using (public.is_company_member(company_id));
 
--- customers
 drop policy if exists customers_select on public.customers;
 create policy customers_select on public.customers
   for select to authenticated
@@ -205,7 +220,6 @@ create policy customers_delete on public.customers
   for delete to authenticated
   using (public.is_company_member(company_id));
 
--- vendors
 drop policy if exists vendors_select on public.vendors;
 create policy vendors_select on public.vendors
   for select to authenticated
@@ -228,5 +242,5 @@ create policy vendors_delete on public.vendors
   using (public.is_company_member(company_id));
 
 -- =============================================================================
--- DONE — Masters ready for Phase 4 UI
+-- DONE
 -- =============================================================================
