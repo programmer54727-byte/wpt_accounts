@@ -130,12 +130,13 @@ Structure follows Tally: **Groups → Ledgers**
 | Office Expenses | Indirect Expenses | |
 | Profit & Loss A/c | — | System ledger |
 
+> GST ledgers (CGST, SGST, IGST, Input CGST/SGST/IGST) are **not** auto-created. Users can add them under **Duties & Taxes** when needed.  
 > The exact list may be refined during implementation. The principle stays the same: **Tally-like defaults on company create**.
 
 ### 4.3 Rules for Ledgers
 
-1. **System ledgers** (Cash, CGST, SGST, IGST, Profit & Loss A/c, etc.) cannot be deleted; rename is limited or disabled
-2. Users can **add new ledgers** under existing groups
+1. **System ledgers** (Cash, Bank Account, Sales, Purchase, Profit & Loss A/c, and other seeded defaults marked as system) cannot be deleted; rename is limited or disabled
+2. Users can **add new ledgers** under existing groups (including GST ledgers under Duties & Taxes)
 3. **Duplicate ledger names** within the same company are **not allowed**
 4. Optional ledger code must also be unique per company
 5. Group hierarchy is maintained via `parent_id`
@@ -236,6 +237,7 @@ Actions:
 | Multi-company | Yes |
 | First screen after login | Company create / select |
 | Default ledgers | Tally-style, auto-created on company create |
+| GST default ledgers | Not auto-created (user can add under Duties & Taxes) |
 | Duplicate ledgers | Not allowed (per company) |
 | Duplicate customers/vendors | Not allowed (per company) |
 | System ledgers deletable? | No |
@@ -257,4 +259,4 @@ After confirmation, Phase 2 implementation will start (schema → onboarding →
 ---
 
 **Web Power Tech**  
-Document version: 1.1 — October 2026
+Document version: 1.2 — October 2026
