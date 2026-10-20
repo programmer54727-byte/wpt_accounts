@@ -12,8 +12,7 @@ type StockItem = {
   item_type: string;
   unit: string;
   hsn_sac: string | null;
-  sale_rate: number;
-  purchase_rate: number;
+  avg_rate: number;
   gst_rate: number;
   is_active: boolean;
 };
@@ -31,7 +30,6 @@ export default function StockItemsPage() {
   const [itemType, setItemType] = useState<"goods" | "service">("goods");
   const [unit, setUnit] = useState("Nos");
   const [hsn, setHsn] = useState("");
-  /** Opening / avg rate (from inward & opening only; outward ignored). */
   const [avgRate, setAvgRate] = useState("0");
   const [gstRate, setGstRate] = useState("5");
 
@@ -71,9 +69,7 @@ export default function StockItemsPage() {
     const supabase = createClient();
     const { data, error } = await supabase
       .from("stock_items")
-      .select(
-        "id, name, code, item_type, unit, hsn_sac, sale_rate, purchase_rate, gst_rate, is_active"
-      )
+      .select("id, name, code, item_type, unit, hsn_sac, avg_rate, gst_rate, is_active")
       .eq("company_id", id)
       .order("name");
 
@@ -113,8 +109,6 @@ export default function StockItemsPage() {
 
     const rate = Number(avgRate) || 0;
 
-    // Store same value in sale_rate & purchase_rate for now.
-    // Later: avg rate = weighted average of opening + inward only (outward ignored).
     const supabase = createClient();
     const { error } = await supabase.from("stock_items").insert({
       company_id: companyId,
@@ -123,6 +117,8 @@ export default function StockItemsPage() {
       item_type: itemType,
       unit: unit.trim() || "Nos",
       hsn_sac: hsn.trim() || null,
+      avg_rate: rate,
+      // keep legacy columns in sync
       sale_rate: rate,
       purchase_rate: rate,
       gst_rate: gst,
@@ -153,17 +149,12 @@ export default function StockItemsPage() {
     else await load();
   };
 
-  /** Display avg rate (prefer purchase_rate as stock cost base). */
-  const displayRate = (item: StockItem) =>
-    Number(item.purchase_rate || item.sale_rate || 0);
-
   return (
     <AppShell title="Stock Items">
       <div className="space-y-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-[var(--text-muted)]">
-            Products and services for sales and purchase. Rate is average from
-            opening + inward (outward does not change average).
+            Avg rate from opening + inward only. Outward does not change average.
           </p>
           <button
             type="button"
@@ -247,13 +238,9 @@ export default function StockItemsPage() {
                 value={avgRate}
                 onChange={(e) => setAvgRate(e.target.value)}
                 className={inputClass}
-                placeholder="From opening + inward"
+                placeholder="Opening + inward average"
               />
             </Field>
-            <p className="text-xs text-[var(--text-muted)] sm:col-span-2 lg:col-span-3">
-              Later this rate will auto-update from stock inward and opening only.
-              Sales outward will not change the average rate.
-            </p>
             <div className="flex items-end sm:col-span-2 lg:col-span-3">
               <button
                 type="submit"
@@ -314,7 +301,7 @@ export default function StockItemsPage() {
                         {Number(item.gst_rate)}%
                       </td>
                       <td className="px-4 py-3 text-right text-[var(--text-primary)]">
-                        ₹{displayRate(item).toFixed(2)}
+                        ₹{Number(item.avg_rate || 0).toFixed(2)}
                       </td>
                       <td className="px-4 py-3 text-right">
                         <button
