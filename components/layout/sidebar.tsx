@@ -44,6 +44,35 @@ const icon = {
       <path d="M12 3v6" />
     </svg>
   ),
+  box: (
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+      <path d="m3.3 7 8.7 5 8.7-5" />
+      <path d="M12 22V12" />
+    </svg>
+  ),
+  warehouse: (
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M22 8.35V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8.35A2 2 0 0 1 3.26 6.5l8-3.2a2 2 0 0 1 1.48 0l8 3.2A2 2 0 0 1 22 8.35Z" />
+      <path d="M6 18h12" />
+      <path d="M6 14h12" />
+      <rect width="12" height="12" x="6" y="10" />
+    </svg>
+  ),
+  percent: (
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="19" x2="5" y1="5" y2="19" />
+      <circle cx="6.5" cy="6.5" r="2.5" />
+      <circle cx="17.5" cy="17.5" r="2.5" />
+    </svg>
+  ),
+  target: (
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <circle cx="12" cy="12" r="6" />
+      <circle cx="12" cy="12" r="2" />
+    </svg>
+  ),
   invoice: (
     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
@@ -83,6 +112,21 @@ const icon = {
       <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
     </svg>
   ),
+  transfer: (
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M8 3 4 7l4 4" />
+      <path d="M4 7h16" />
+      <path d="m16 21 4-4-4-4" />
+      <path d="M20 17H4" />
+    </svg>
+  ),
+  credit: (
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+      <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+      <path d="M9 15h6" />
+    </svg>
+  ),
   report: (
     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <line x1="18" x2="18" y1="20" y2="10" />
@@ -90,10 +134,33 @@ const icon = {
       <line x1="6" x2="6" y1="20" y2="14" />
     </svg>
   ),
+  book: (
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a2.5 2.5 0 0 1 0-5H20" />
+    </svg>
+  ),
   settings: (
     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
       <circle cx="12" cy="12" r="3" />
+    </svg>
+  ),
+  building: (
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z" />
+      <path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" />
+      <path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2" />
+      <path d="M10 6h4" />
+      <path d="M10 10h4" />
+      <path d="M10 14h4" />
+      <path d="M10 18h4" />
+    </svg>
+  ),
+  download: (
+    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+      <polyline points="7 10 12 15 17 10" />
+      <line x1="12" x2="12" y1="15" y2="3" />
     </svg>
   ),
 };
@@ -111,6 +178,10 @@ const sections: NavSection[] = [
       { label: "Chart of Accounts", href: "/ledgers", icon: icon.ledger },
       { label: "Customers", href: "/customers", icon: icon.users },
       { label: "Vendors", href: "/vendors", icon: icon.vendor },
+      { label: "Stock Items", href: "/stock-items", icon: icon.box },
+      { label: "Godowns", href: "/godowns", icon: icon.warehouse },
+      { label: "Tax Rates", href: "/tax-rates", icon: icon.percent },
+      { label: "Cost Centres", href: "/cost-centres", icon: icon.target },
     ],
   },
   {
@@ -121,15 +192,24 @@ const sections: NavSection[] = [
       { label: "Payment", href: "/payments", icon: icon.payment },
       { label: "Receipt", href: "/receipts", icon: icon.receipt },
       { label: "Journal", href: "/journals", icon: icon.journal },
+      { label: "Contra", href: "/contra", icon: icon.transfer },
+      { label: "Credit Note", href: "/credit-notes", icon: icon.credit },
+      { label: "Debit Note", href: "/debit-notes", icon: icon.credit },
       { label: "Expenses", href: "/expenses", icon: icon.expense },
     ],
   },
   {
     title: "Reports",
     items: [
+      { label: "Day Book", href: "/reports/day-book", icon: icon.book },
+      { label: "Cash Book", href: "/reports/cash-book", icon: icon.book },
+      { label: "Bank Book", href: "/reports/bank-book", icon: icon.book },
+      { label: "Ledger Statement", href: "/reports/ledger", icon: icon.ledger },
       { label: "Trial Balance", href: "/reports/trial-balance", icon: icon.report },
       { label: "Profit & Loss", href: "/reports/profit-loss", icon: icon.report },
       { label: "Balance Sheet", href: "/reports/balance-sheet", icon: icon.report },
+      { label: "Aged Receivables", href: "/reports/aged-receivables", icon: icon.report },
+      { label: "Aged Payables", href: "/reports/aged-payables", icon: icon.report },
       { label: "GST Summary", href: "/reports/gst", icon: icon.report },
       { label: "All Reports", href: "/reports", icon: icon.report },
     ],
@@ -137,6 +217,8 @@ const sections: NavSection[] = [
   {
     title: "System",
     items: [
+      { label: "Company Profile", href: "/settings/company", icon: icon.building },
+      { label: "Export / Backup", href: "/settings/export", icon: icon.download },
       { label: "Settings", href: "/settings", icon: icon.settings },
     ],
   },
@@ -145,10 +227,17 @@ const sections: NavSection[] = [
 export function Sidebar() {
   const pathname = usePathname();
 
+  const isActive = (href: string) => {
+    if (href === "/dashboard") return pathname === "/dashboard";
+    if (href === "/reports") return pathname === "/reports";
+    if (href === "/settings") return pathname === "/settings";
+    return pathname === href || pathname.startsWith(href + "/");
+  };
+
   return (
     <aside className="fixed left-0 top-0 z-40 flex h-screen w-64 flex-col border-r border-[var(--border)] bg-[var(--surface)]">
       {/* Logo */}
-      <div className="flex h-16 items-center gap-3 border-b border-[var(--border)] px-5">
+      <div className="flex h-16 shrink-0 items-center gap-3 border-b border-[var(--border)] px-5">
         <div className="relative h-9 w-9 overflow-hidden rounded-md">
           <Image
             src="/wpt-logo.jpg"
@@ -173,20 +262,7 @@ export function Sidebar() {
             </div>
             <div className="space-y-0.5">
               {section.items.map((item) => {
-                const isActive =
-                  pathname === item.href ||
-                  (item.href !== "/dashboard" &&
-                    item.href !== "/reports" &&
-                    pathname.startsWith(item.href + "/"));
-                const activeExact =
-                  pathname === item.href ||
-                  (item.href !== "/reports" && pathname.startsWith(item.href + "/"));
-
-                const active =
-                  item.href === "/reports"
-                    ? pathname === "/reports"
-                    : activeExact;
-
+                const active = isActive(item.href);
                 return (
                   <Link
                     key={item.href}
@@ -210,7 +286,7 @@ export function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="border-t border-[var(--border)] p-4">
+      <div className="shrink-0 border-t border-[var(--border)] p-4">
         <div className="rounded-lg bg-[var(--background)] px-3 py-2 text-xs text-[var(--text-muted)]">
           Role:{" "}
           <span className="font-medium text-[var(--text-secondary)]">Accountant</span>
