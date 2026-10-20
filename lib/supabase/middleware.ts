@@ -38,8 +38,13 @@ export async function updateSession(request: NextRequest) {
   const isProtectedApp =
     path.startsWith("/dashboard") ||
     path.startsWith("/invoices") ||
-    path.startsWith("/expenses") ||
+    path.startsWith("/bills") ||
+    path.startsWith("/payments") ||
+    path.startsWith("/receipts") ||
+    path.startsWith("/journals") ||
     path.startsWith("/customers") ||
+    path.startsWith("/vendors") ||
+    path.startsWith("/ledgers") ||
     path.startsWith("/reports") ||
     path.startsWith("/settings");
 
@@ -49,21 +54,18 @@ export async function updateSession(request: NextRequest) {
   const isAuthPage =
     path.startsWith("/login") || path.startsWith("/register");
 
-  // Not logged in → login for app or company routes
   if ((isProtectedApp || isCompanyFlow) && !user) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 
-  // Logged in on auth pages → company select flow
   if (isAuthPage && user) {
     const url = request.nextUrl.clone();
     url.pathname = "/select-company";
     return NextResponse.redirect(url);
   }
 
-  // Logged in on protected app routes → ensure they have at least one company
   if (isProtectedApp && user) {
     const { count } = await supabase
       .from("company_members")
