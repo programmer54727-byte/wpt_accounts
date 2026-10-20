@@ -14,6 +14,7 @@ type StockItem = {
   hsn_sac: string | null;
   sale_rate: number;
   purchase_rate: number;
+  gst_rate: number;
   is_active: boolean;
 };
 
@@ -32,10 +33,11 @@ export default function StockItemsPage() {
   const [hsn, setHsn] = useState("");
   const [saleRate, setSaleRate] = useState("0");
   const [purchaseRate, setPurchaseRate] = useState("0");
+  const [gstRate, setGstRate] = useState("18");
 
   const resolveCompany = useCallback(async () => {
     const supabase = createClient();
-    let id = getActiveCompanyId();
+    const id = getActiveCompanyId();
 
     if (id) {
       const { data } = await supabase
@@ -69,7 +71,9 @@ export default function StockItemsPage() {
     const supabase = createClient();
     const { data, error } = await supabase
       .from("stock_items")
-      .select("id, name, code, item_type, unit, hsn_sac, sale_rate, purchase_rate, is_active")
+      .select(
+        "id, name, code, item_type, unit, hsn_sac, sale_rate, purchase_rate, gst_rate, is_active"
+      )
       .eq("company_id", id)
       .order("name");
 
@@ -90,6 +94,7 @@ export default function StockItemsPage() {
     setHsn("");
     setSaleRate("0");
     setPurchaseRate("0");
+    setGstRate("18");
     setShowForm(false);
   };
 
@@ -99,6 +104,13 @@ export default function StockItemsPage() {
 
     setSaving(true);
     setError(null);
+
+    const gst = Number(gstRate);
+    if (Number.isNaN(gst) || gst < 0 || gst > 100) {
+      setError("GST rate must be between 0 and 100.");
+      setSaving(false);
+      return;
+    }
 
     const supabase = createClient();
     const { error } = await supabase.from("stock_items").insert({
@@ -110,6 +122,7 @@ export default function StockItemsPage() {
       hsn_sac: hsn.trim() || null,
       sale_rate: Number(saleRate) || 0,
       purchase_rate: Number(purchaseRate) || 0,
+      gst_rate: gst,
     });
 
     setSaving(false);
@@ -206,6 +219,19 @@ export default function StockItemsPage() {
                 className={inputClass}
               />
             </Field>
+            <Field label="GST rate (%)">
+              <select
+                value={gstRate}
+                onChange={(e) => setGstRate(e.target.value)}
+                className={inputClass}
+              >
+                <option value="0">0%</option>
+                <option value="5">5%</option>
+                <option value="12">12%</option>
+                <option value="18">18%</option>
+                <option value="28">28%</option>
+              </select>
+            </Field>
             <Field label="Sale rate">
               <input
                 type="number"
@@ -247,13 +273,14 @@ export default function StockItemsPage() {
             </p>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[640px] text-left text-sm">
+              <table className="w-full min-w-[720px] text-left text-sm">
                 <thead className="border-b border-[var(--border)] bg-[var(--background)] text-xs text-[var(--text-muted)]">
                   <tr>
                     <th className="px-4 py-3 font-medium">Name</th>
                     <th className="px-4 py-3 font-medium">Code</th>
                     <th className="px-4 py-3 font-medium">Type</th>
                     <th className="px-4 py-3 font-medium">Unit</th>
+                    <th className="px-4 py-3 font-medium text-right">GST %</th>
                     <th className="px-4 py-3 font-medium text-right">Sale</th>
                     <th className="px-4 py-3 font-medium text-right">Purchase</th>
                     <th className="px-4 py-3 font-medium" />
@@ -281,6 +308,9 @@ export default function StockItemsPage() {
                       </td>
                       <td className="px-4 py-3 text-[var(--text-secondary)]">
                         {item.unit}
+                      </td>
+                      <td className="px-4 py-3 text-right text-[var(--text-primary)]">
+                        {Number(item.gst_rate)}%
                       </td>
                       <td className="px-4 py-3 text-right text-[var(--text-primary)]">
                         ₹{Number(item.sale_rate).toFixed(2)}
