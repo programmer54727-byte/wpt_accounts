@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { CompanySwitcher } from "@/components/layout/company-switcher";
 import { createClient } from "@/lib/supabase/client";
 
 interface HeaderProps {
@@ -19,10 +20,14 @@ export function Header({ title = "Dashboard" }: HeaderProps) {
   };
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-[var(--border)] bg-[var(--surface)] px-6">
-      <h1 className="text-lg font-semibold text-[var(--text-primary)]">{title}</h1>
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b border-[var(--border)] bg-[var(--surface)] px-6">
+      <h1 className="shrink-0 text-lg font-semibold text-[var(--text-primary)]">
+        {title}
+      </h1>
 
       <div className="flex items-center gap-3">
+        <CompanySwitcher />
+
         <ThemeToggle />
 
         <button
