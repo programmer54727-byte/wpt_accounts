@@ -107,11 +107,6 @@ const icon = {
       <path d="M15 3v4a2 2 0 0 0 2 2h4" />
     </svg>
   ),
-  expense: (
-    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-    </svg>
-  ),
   transfer: (
     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M8 3 4 7l4 4" />
@@ -195,7 +190,6 @@ const sections: NavSection[] = [
       { label: "Contra", href: "/contra", icon: icon.transfer },
       { label: "Credit Note", href: "/credit-notes", icon: icon.credit },
       { label: "Debit Note", href: "/debit-notes", icon: icon.credit },
-      { label: "Expenses", href: "/expenses", icon: icon.expense },
     ],
   },
   {
@@ -236,7 +230,6 @@ export function Sidebar() {
 
   return (
     <aside className="fixed left-0 top-0 z-40 flex h-screen w-64 flex-col border-r border-[var(--border)] bg-[var(--surface)]">
-      {/* Logo */}
       <div className="flex h-16 shrink-0 items-center gap-3 border-b border-[var(--border)] px-5">
         <div className="relative h-9 w-9 overflow-hidden rounded-md">
           <Image
@@ -253,7 +246,6 @@ export function Sidebar() {
         </div>
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 overflow-y-auto p-3">
         {sections.map((section) => (
           <div key={section.title} className="mb-4">
@@ -285,7 +277,6 @@ export function Sidebar() {
         ))}
       </nav>
 
-      {/* Footer */}
       <div className="shrink-0 border-t border-[var(--border)] p-4">
         <div className="rounded-lg bg-[var(--background)] px-3 py-2 text-xs text-[var(--text-muted)]">
           Role:{" "}
