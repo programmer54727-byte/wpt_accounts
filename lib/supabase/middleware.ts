@@ -35,8 +35,7 @@ export async function updateSession(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
 
-  // Protected routes — require login
-  const isProtected =
+  const isProtectedApp =
     path.startsWith("/dashboard") ||
     path.startsWith("/invoices") ||
     path.startsWith("/expenses") ||
@@ -44,20 +43,38 @@ export async function updateSession(request: NextRequest) {
     path.startsWith("/reports") ||
     path.startsWith("/settings");
 
-  // Auth pages — redirect if already logged in
+  const isCompanyFlow =
+    path.startsWith("/onboarding") || path.startsWith("/select-company");
+
   const isAuthPage =
     path.startsWith("/login") || path.startsWith("/register");
 
-  if (isProtected && !user) {
+  // Not logged in → login for app or company routes
+  if ((isProtectedApp || isCompanyFlow) && !user) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 
+  // Logged in on auth pages → company select flow
   if (isAuthPage && user) {
     const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
+    url.pathname = "/select-company";
     return NextResponse.redirect(url);
+  }
+
+  // Logged in on protected app routes → ensure they have at least one company
+  if (isProtectedApp && user) {
+    const { count } = await supabase
+      .from("company_members")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id);
+
+    if (!count || count === 0) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/onboarding";
+      return NextResponse.redirect(url);
+    }
   }
 
   return supabaseResponse;
