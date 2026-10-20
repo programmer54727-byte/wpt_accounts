@@ -236,6 +236,7 @@ export default function StockItemsPage() {
                   value={hsn}
                   onChange={(e) => setHsn(e.target.value)}
                   className={inputClass}
+                  placeholder="e.g. 4202"
                 />
               </Field>
               <Field label="GST rate (%)">
@@ -252,7 +253,6 @@ export default function StockItemsPage() {
               </Field>
             </div>
 
-            {/* Opening stock */}
             <div className="rounded-lg border border-[var(--border)] bg-[var(--background)] p-3">
               <p className="mb-3 text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
                 Opening stock
@@ -322,18 +322,18 @@ export default function StockItemsPage() {
             </p>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[720px] text-left text-sm">
+              <table className="w-full min-w-[800px] table-auto text-sm">
                 <thead className="border-b border-[var(--border)] bg-[var(--background)] text-xs text-[var(--text-muted)]">
                   <tr>
-                    <th className="px-4 py-3 font-medium">Name</th>
-                    <th className="px-4 py-3 font-medium">Code</th>
-                    <th className="px-4 py-3 font-medium">Unit</th>
-                    <th className="px-4 py-3 font-medium text-right">HSN CODE</th>
-                    <th className="px-4 py-3 font-medium text-right">GST %</th>
-                    <th className="px-4 py-3 font-medium text-right">Op. qty</th>
-                    <th className="px-4 py-3 font-medium text-right">Rate</th>
-                    <th className="px-4 py-3 font-medium text-right">Op. value</th>
-                    <th className="px-4 py-3 font-medium" />
+                    <th className="px-4 py-3 text-left font-medium">Name</th>
+                    <th className="px-4 py-3 text-left font-medium">Code</th>
+                    <th className="px-4 py-3 text-left font-medium">Unit</th>
+                    <th className="px-4 py-3 text-left font-medium">HSN</th>
+                    <th className="px-4 py-3 text-right font-medium">GST %</th>
+                    <th className="px-4 py-3 text-right font-medium">Op. qty</th>
+                    <th className="px-4 py-3 text-right font-medium">Rate</th>
+                    <th className="px-4 py-3 text-right font-medium">Op. value</th>
+                    <th className="px-4 py-3 text-right font-medium w-16" />
                   </tr>
                 </thead>
                 <tbody>
@@ -342,28 +342,28 @@ export default function StockItemsPage() {
                       key={item.id}
                       className="border-b border-[var(--border)] last:border-0"
                     >
-                      <td className="px-4 py-3 font-medium text-[var(--text-primary)]">
+                      <td className="px-4 py-3 text-left font-medium text-[var(--text-primary)]">
                         {item.name}
                       </td>
-                      <td className="px-4 py-3 text-[var(--text-secondary)]">
+                      <td className="px-4 py-3 text-left text-[var(--text-secondary)]">
                         {item.code ?? "—"}
                       </td>
-                      <td className="px-4 py-3 text-[var(--text-secondary)]">
+                      <td className="px-4 py-3 text-left text-[var(--text-secondary)]">
                         {item.unit}
                       </td>
-                      <td className="px-4 py-3 text-[var( --text-primary)]">
-                        {item.hsn_sac}
+                      <td className="px-4 py-3 text-left whitespace-nowrap text-[var(--text-primary)]">
+                        {item.hsn_sac?.trim() ? item.hsn_sac : "—"}
                       </td>
-                      <td className="px-4 py-3 text-right text-[var(--text-primary)]">
+                      <td className="px-4 py-3 text-right whitespace-nowrap text-[var(--text-primary)]">
                         {Number(item.gst_rate)}%
                       </td>
-                      <td className="px-4 py-3 text-right text-[var(--text-primary)]">
+                      <td className="px-4 py-3 text-right whitespace-nowrap text-[var(--text-primary)]">
                         {Number(item.opening_qty)}
                       </td>
-                      <td className="px-4 py-3 text-right text-[var(--text-primary)]">
+                      <td className="px-4 py-3 text-right whitespace-nowrap text-[var(--text-primary)]">
                         ₹{Number(item.avg_rate || 0).toFixed(2)}
                       </td>
-                      <td className="px-4 py-3 text-right text-[var(--text-primary)]">
+                      <td className="px-4 py-3 text-right whitespace-nowrap text-[var(--text-primary)]">
                         ₹{Number(item.opening_value || 0).toFixed(2)}
                       </td>
                       <td className="px-4 py-3 text-right">
