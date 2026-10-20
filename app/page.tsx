@@ -28,7 +28,15 @@ export default function Home() {
             </div>
           </div>
 
-          <ThemeToggle />
+          <div className="flex items-center gap-3">
+            <Link
+              href="/login"
+              className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+            >
+              Sign In
+            </Link>
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 
@@ -61,10 +69,16 @@ export default function Home() {
 
         <div className="flex flex-col gap-3 sm:flex-row">
           <Link
-            href="/dashboard"
+            href="/register"
             className="rounded-lg bg-[var(--primary)] px-8 py-3 text-sm font-medium text-white transition-colors hover:bg-[var(--primary-hover)]"
           >
             Get Started
+          </Link>
+          <Link
+            href="/login"
+            className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-8 py-3 text-sm font-medium text-[var(--text-primary)] transition-colors hover:bg-[var(--surface-elevated)]"
+          >
+            Sign In
           </Link>
         </div>
 
