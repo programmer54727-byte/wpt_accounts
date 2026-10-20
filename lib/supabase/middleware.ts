@@ -45,6 +45,13 @@ export async function updateSession(request: NextRequest) {
     path.startsWith("/customers") ||
     path.startsWith("/vendors") ||
     path.startsWith("/ledgers") ||
+    path.startsWith("/stock-items") ||
+    path.startsWith("/tax-rates") ||
+    path.startsWith("/godowns") ||
+    path.startsWith("/cost-centres") ||
+    path.startsWith("/contra") ||
+    path.startsWith("/credit-notes") ||
+    path.startsWith("/debit-notes") ||
     path.startsWith("/reports") ||
     path.startsWith("/settings");
 
