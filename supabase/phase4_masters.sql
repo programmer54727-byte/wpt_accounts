@@ -1,7 +1,7 @@
 -- =============================================================================
 -- WPT Accounts — Phase 4 Masters Schema
 -- stock_items, customers, vendors, tax_rates
--- Run in Supabase SQL Editor after phase2_schema.sql
+-- Run after phase2_schema.sql
 -- =============================================================================
 
 create table if not exists public.tax_rates (
@@ -28,16 +28,13 @@ create table if not exists public.stock_items (
     check (item_type in ('goods', 'service')),
   unit text not null default 'Nos',
   hsn_sac text,
-  -- Legacy columns (kept for compatibility; prefer avg_rate)
-  sale_rate numeric(14, 2) not null default 0 check (sale_rate >= 0),
-  purchase_rate numeric(14, 2) not null default 0 check (purchase_rate >= 0),
-  -- Average / closing rate: opening + inward only (outward ignored)
+  -- Average rate (opening + inward only)
   avg_rate numeric(14, 2) not null default 0 check (avg_rate >= 0),
   gst_rate numeric(8, 3) not null default 0
     check (gst_rate >= 0 and gst_rate <= 100),
   tax_rate_id uuid references public.tax_rates (id) on delete set null,
-  opening_qty numeric(14, 3) not null default 0,
-  opening_value numeric(14, 2) not null default 0,
+  opening_qty numeric(14, 3) not null default 0 check (opening_qty >= 0),
+  opening_value numeric(14, 2) not null default 0 check (opening_value >= 0),
   description text,
   is_active boolean not null default true,
   created_at timestamptz not null default now(),
@@ -46,7 +43,7 @@ create table if not exists public.stock_items (
   constraint stock_items_code_unique unique (company_id, code)
 );
 
--- Migrations for existing tables
+-- Migrations for existing installs
 do $$
 begin
   if not exists (
@@ -67,6 +64,10 @@ begin
         check (avg_rate >= 0);
   end if;
 end $$;
+
+-- Drop legacy rate columns if present
+alter table public.stock_items drop column if exists sale_rate;
+alter table public.stock_items drop column if exists purchase_rate;
 
 create index if not exists stock_items_company_id_idx on public.stock_items (company_id);
 create index if not exists stock_items_tax_rate_id_idx on public.stock_items (tax_rate_id);
