@@ -28,9 +28,15 @@ type Line = {
   discount: string;
 };
 
+let lineKeySeq = 0;
+function nextLineKey() {
+  lineKeySeq += 1;
+  return `line-${lineKeySeq}`;
+}
+
 function emptyLine(): Line {
   return {
-    key: crypto.randomUUID(),
+    key: nextLineKey(),
     stock_item_id: "",
     description: "",
     hsn_sac: "",
@@ -63,14 +69,12 @@ export default function NewInvoicePage() {
 
   const [customerId, setCustomerId] = useState("");
   const [invoiceNumber, setInvoiceNumber] = useState("");
-  const [invoiceDate, setInvoiceDate] = useState(
-    () => new Date().toISOString().slice(0, 10)
-  );
+  const [invoiceDate, setInvoiceDate] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [status, setStatus] = useState("sent");
   const [placeOfSupply, setPlaceOfSupply] = useState("");
   const [notes, setNotes] = useState("");
-  const [lines, setLines] = useState<Line[]>([emptyLine()]);
+  const [lines, setLines] = useState<Line[]>([]);
 
   const resolveCompany = useCallback(async () => {
     const supabase = createClient();
@@ -88,6 +92,10 @@ export default function NewInvoicePage() {
   }, []);
 
   useEffect(() => {
+    // Client-only defaults (avoid prerender Date/crypto issues)
+    setInvoiceDate(new Date().toISOString().slice(0, 10));
+    setLines([emptyLine()]);
+
     (async () => {
       setLoading(true);
       const cid = await resolveCompany();
@@ -119,7 +127,6 @@ export default function NewInvoicePage() {
       if (itemRes.error) setError(itemRes.error.message);
       else setItems((itemRes.data as StockItem[]) ?? []);
 
-      // Suggest next invoice number INV-0001
       const nums = (invRes.data ?? [])
         .map((r) => {
           const m = String(r.invoice_number).match(/(\d+)$/);
@@ -182,6 +189,10 @@ export default function NewInvoicePage() {
     }
     if (!invoiceNumber.trim()) {
       setError("Invoice number is required.");
+      return;
+    }
+    if (!invoiceDate) {
+      setError("Invoice date is required.");
       return;
     }
 
@@ -249,7 +260,6 @@ export default function NewInvoicePage() {
     setSaving(false);
 
     if (linesErr) {
-      // rollback header
       await supabase.from("invoices").delete().eq("id", inv.id);
       setError(linesErr.message);
       return;
@@ -348,7 +358,6 @@ export default function NewInvoicePage() {
           </div>
         </div>
 
-        {/* Line items */}
         <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)]">
           <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-3">
             <p className="text-sm font-medium text-[var(--text-primary)]">Line items</p>
