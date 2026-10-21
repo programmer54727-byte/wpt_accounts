@@ -5,11 +5,14 @@ import { AppShell } from "@/components/layout/app-shell";
 import { createClient } from "@/lib/supabase/client";
 import { getActiveCompanyId, setActiveCompanyId } from "@/lib/company/active";
 
+type GstType = "regular" | "composition" | "unregistered" | "consumer" | "sez";
+
 type Customer = {
   id: string;
   name: string;
   code: string | null;
   gstin: string | null;
+  gst_type: GstType;
   pan: string | null;
   email: string | null;
   phone: string | null;
@@ -22,10 +25,19 @@ type Customer = {
   is_active: boolean;
 };
 
+const GST_TYPES: { value: GstType; label: string }[] = [
+  { value: "regular", label: "Regular" },
+  { value: "composition", label: "Composition" },
+  { value: "unregistered", label: "Unregistered" },
+  { value: "consumer", label: "Consumer" },
+  { value: "sez", label: "SEZ" },
+];
+
 const emptyForm = {
   name: "",
   code: "",
   gstin: "",
+  gst_type: "unregistered" as GstType,
   pan: "",
   email: "",
   phone: "",
@@ -36,6 +48,10 @@ const emptyForm = {
   country: "India",
   notes: "",
 };
+
+function gstLabel(t: string | null | undefined) {
+  return GST_TYPES.find((x) => x.value === t)?.label ?? t ?? "—";
+}
 
 export default function CustomersPage() {
   const [rows, setRows] = useState<Customer[]>([]);
@@ -84,7 +100,7 @@ export default function CustomersPage() {
     const { data, error } = await supabase
       .from("customers")
       .select(
-        "id, name, code, gstin, pan, email, phone, billing_address, city, state, pincode, country, notes, is_active"
+        "id, name, code, gstin, gst_type, pan, email, phone, billing_address, city, state, pincode, country, notes, is_active"
       )
       .eq("company_id", id)
       .order("name");
@@ -114,6 +130,7 @@ export default function CustomersPage() {
       name: c.name,
       code: c.code ?? "",
       gstin: c.gstin ?? "",
+      gst_type: (c.gst_type as GstType) || "unregistered",
       pan: c.pan ?? "",
       email: c.email ?? "",
       phone: c.phone ?? "",
@@ -140,6 +157,7 @@ export default function CustomersPage() {
       name: form.name.trim(),
       code: form.code.trim() || null,
       gstin: form.gstin.trim() || null,
+      gst_type: form.gst_type,
       pan: form.pan.trim() || null,
       email: form.email.trim() || null,
       phone: form.phone.trim() || null,
@@ -178,8 +196,8 @@ export default function CustomersPage() {
         setError("A customer with this code already exists in this company.");
       } else if (error.message.includes("customers_gstin_unique")) {
         setError("A customer with this GSTIN already exists in this company.");
-      } else if (error.message.includes("does not exist") || error.message.includes("schema cache")) {
-        setError("Customers table missing. Run supabase/phase4_masters.sql in Supabase.");
+      } else if (error.message.includes("gst_type")) {
+        setError("Run phase4_gst_type.sql in Supabase to add GST type column.");
       } else {
         setError(error.message);
       }
@@ -256,6 +274,19 @@ export default function CustomersPage() {
                   className={inputClass}
                   placeholder="Optional"
                 />
+              </Field>
+              <Field label="GST type">
+                <select
+                  value={form.gst_type}
+                  onChange={(e) => setField("gst_type", e.target.value)}
+                  className={inputClass}
+                >
+                  {GST_TYPES.map((t) => (
+                    <option key={t.value} value={t.value}>
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
               </Field>
               <Field label="GSTIN">
                 <input
@@ -373,11 +404,12 @@ export default function CustomersPage() {
             </p>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[720px] table-auto text-sm">
+              <table className="w-full min-w-[800px] table-auto text-sm">
                 <thead className="border-b border-[var(--border)] bg-[var(--background)] text-xs text-[var(--text-muted)]">
                   <tr>
                     <th className="px-4 py-3 text-left font-medium">Name</th>
                     <th className="px-4 py-3 text-left font-medium">Code</th>
+                    <th className="px-4 py-3 text-left font-medium">GST type</th>
                     <th className="px-4 py-3 text-left font-medium">GSTIN</th>
                     <th className="px-4 py-3 text-left font-medium">Phone</th>
                     <th className="px-4 py-3 text-left font-medium">State</th>
@@ -400,6 +432,9 @@ export default function CustomersPage() {
                       </td>
                       <td className="px-4 py-3 text-left text-[var(--text-secondary)]">
                         {c.code ?? "—"}
+                      </td>
+                      <td className="px-4 py-3 text-left text-[var(--text-primary)]">
+                        {gstLabel(c.gst_type)}
                       </td>
                       <td className="px-4 py-3 text-left whitespace-nowrap text-[var(--text-primary)]">
                         {c.gstin ?? "—"}
