@@ -17,6 +17,11 @@ type StockItem = {
   avg_rate: number;
   gst_rate: number;
 };
+type Ledger = {
+  id: string;
+  name: string;
+  account_type: string;
+};
 
 type Line = {
   key: string;
@@ -27,6 +32,14 @@ type Line = {
   rate: string;
   gst_rate: string;
   discount: string;
+};
+
+type ChargeLine = {
+  key: string;
+  ledger_id: string;
+  description: string;
+  amount: string;
+  gst_rate: string;
 };
 
 let lineKeySeq = 0;
@@ -48,6 +61,16 @@ function emptyLine(): Line {
   };
 }
 
+function emptyCharge(): ChargeLine {
+  return {
+    key: nextLineKey(),
+    ledger_id: "",
+    description: "",
+    amount: "0",
+    gst_rate: "0",
+  };
+}
+
 function calcLine(line: Line) {
   const qty = Number(line.qty) || 0;
   const rate = Number(line.rate) || 0;
@@ -59,6 +82,13 @@ function calcLine(line: Line) {
   return { amount, tax, total };
 }
 
+function calcCharge(c: ChargeLine) {
+  const amount = Math.max(0, Number(c.amount) || 0);
+  const gst = Number(c.gst_rate) || 0;
+  const tax = (amount * gst) / 100;
+  return { amount, tax, total: amount + tax };
+}
+
 const inputClass =
   "w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm text-[var(--text-primary)] outline-none focus:border-[var(--primary)] focus:ring-1 focus:ring-[var(--primary)]";
 
@@ -67,6 +97,7 @@ export default function NewInvoicePage() {
   const [companyId, setCompanyId] = useState<string | null>(null);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [items, setItems] = useState<StockItem[]>([]);
+  const [ledgers, setLedgers] = useState<Ledger[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -79,8 +110,8 @@ export default function NewInvoicePage() {
   const [placeOfSupply, setPlaceOfSupply] = useState("");
   const [notes, setNotes] = useState("");
   const [lines, setLines] = useState<Line[]>([]);
+  const [charges, setCharges] = useState<ChargeLine[]>([]);
 
-  // Quick-add modals
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [customerDraftName, setCustomerDraftName] = useState("");
   const [customerDraftState, setCustomerDraftState] = useState("");
@@ -126,7 +157,7 @@ export default function NewInvoicePage() {
       }
 
       const supabase = createClient();
-      const [custRes, itemRes, invRes] = await Promise.all([
+      const [custRes, itemRes, invRes, ledgerRes] = await Promise.all([
         supabase.from("customers").select("id, name, state").eq("company_id", cid).order("name"),
         supabase
           .from("stock_items")
@@ -139,6 +170,13 @@ export default function NewInvoicePage() {
           .eq("company_id", cid)
           .order("created_at", { ascending: false })
           .limit(50),
+        supabase
+          .from("chart_of_accounts")
+          .select("id, name, account_type")
+          .eq("company_id", cid)
+          .eq("is_group", false)
+          .eq("is_active", true)
+          .order("name"),
       ]);
 
       if (custRes.error) setError(custRes.error.message);
@@ -146,6 +184,9 @@ export default function NewInvoicePage() {
 
       if (itemRes.error) setError(itemRes.error.message);
       else setItems((itemRes.data as StockItem[]) ?? []);
+
+      if (ledgerRes.error) setError(ledgerRes.error.message);
+      else setLedgers((ledgerRes.data as Ledger[]) ?? []);
 
       const nums = (invRes.data ?? [])
         .map((r) => {
@@ -182,6 +223,16 @@ export default function NewInvoicePage() {
     [items]
   );
 
+  const ledgerOptions = useMemo(
+    () =>
+      ledgers.map((l) => ({
+        id: l.id,
+        label: l.name,
+        sublabel: l.account_type,
+      })),
+    [ledgers]
+  );
+
   const onPickCustomer = (id: string) => {
     setCustomerId(id);
     const c = customers.find((x) => x.id === id);
@@ -190,6 +241,10 @@ export default function NewInvoicePage() {
 
   const updateLine = (key: string, patch: Partial<Line>) => {
     setLines((prev) => prev.map((l) => (l.key === key ? { ...l, ...patch } : l)));
+  };
+
+  const updateCharge = (key: string, patch: Partial<ChargeLine>) => {
+    setCharges((prev) => prev.map((c) => (c.key === key ? { ...c, ...patch } : c)));
   };
 
   const onPickItem = (key: string, stockId: string) => {
@@ -204,6 +259,14 @@ export default function NewInvoicePage() {
       hsn_sac: item.hsn_sac ?? "",
       rate: String(item.avg_rate ?? 0),
       gst_rate: String(item.gst_rate ?? 0),
+    });
+  };
+
+  const onPickLedger = (key: string, ledgerId: string) => {
+    const led = ledgers.find((l) => l.id === ledgerId);
+    updateCharge(key, {
+      ledger_id: ledgerId,
+      description: led?.name ?? "",
     });
   };
 
@@ -283,23 +346,36 @@ export default function NewInvoicePage() {
     }
     const item = data as StockItem;
     setItems((prev) => [...prev, item].sort((a, b) => a.name.localeCompare(b.name)));
-    if (itemTargetLineKey) {
-      onPickItem(itemTargetLineKey, item.id);
-    }
+    if (itemTargetLineKey) onPickItem(itemTargetLineKey, item.id);
     setShowItemModal(false);
     setItemTargetLineKey(null);
   };
 
   const totals = useMemo(() => {
-    let subtotal = 0;
-    let taxTotal = 0;
+    let itemsSub = 0;
+    let itemsTax = 0;
     for (const line of lines) {
       const { amount, tax } = calcLine(line);
-      subtotal += amount;
-      taxTotal += tax;
+      itemsSub += amount;
+      itemsTax += tax;
     }
-    return { subtotal, taxTotal, grandTotal: subtotal + taxTotal };
-  }, [lines]);
+    let chargesSub = 0;
+    let chargesTax = 0;
+    for (const c of charges) {
+      const { amount, tax } = calcCharge(c);
+      chargesSub += amount;
+      chargesTax += tax;
+    }
+    const subtotal = itemsSub + chargesSub;
+    const taxTotal = itemsTax + chargesTax;
+    return {
+      itemsSub,
+      chargesSub,
+      subtotal,
+      taxTotal,
+      grandTotal: subtotal + taxTotal,
+    };
+  }, [lines, charges]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -318,8 +394,12 @@ export default function NewInvoicePage() {
     }
 
     const validLines = lines.filter((l) => l.description.trim() && Number(l.qty) > 0);
-    if (validLines.length === 0) {
-      setError("Add at least one line item.");
+    const validCharges = charges.filter(
+      (c) => c.ledger_id && (Number(c.amount) || 0) > 0
+    );
+
+    if (validLines.length === 0 && validCharges.length === 0) {
+      setError("Add at least one item or ledger charge.");
       return;
     }
 
@@ -363,7 +443,9 @@ export default function NewInvoicePage() {
       return {
         invoice_id: inv.id,
         company_id: companyId,
+        line_type: "item",
         stock_item_id: l.stock_item_id || null,
+        ledger_id: null,
         description: l.description.trim(),
         hsn_sac: l.hsn_sac.trim() || null,
         qty: Number(l.qty) || 0,
@@ -377,12 +459,41 @@ export default function NewInvoicePage() {
       };
     });
 
-    const { error: linesErr } = await supabase.from("invoice_items").insert(itemRows);
+    const chargeRows = validCharges.map((c, i) => {
+      const { amount, tax, total } = calcCharge(c);
+      return {
+        invoice_id: inv.id,
+        company_id: companyId,
+        line_type: "charge",
+        stock_item_id: null,
+        ledger_id: c.ledger_id,
+        description: c.description.trim() || "Charge",
+        hsn_sac: null,
+        qty: 1,
+        rate: amount,
+        gst_rate: Number(c.gst_rate) || 0,
+        discount: 0,
+        amount,
+        tax_amount: tax,
+        line_total: total,
+        sort_order: validLines.length + i,
+      };
+    });
+
+    const { error: linesErr } = await supabase
+      .from("invoice_items")
+      .insert([...itemRows, ...chargeRows]);
     setSaving(false);
 
     if (linesErr) {
       await supabase.from("invoices").delete().eq("id", inv.id);
-      setError(linesErr.message);
+      if (linesErr.message.includes("line_type") || linesErr.message.includes("ledger_id")) {
+        setError(
+          "Run supabase/phase4_invoice_ledger_charges.sql in Supabase, then try again."
+        );
+      } else {
+        setError(linesErr.message);
+      }
       return;
     }
 
@@ -474,6 +585,7 @@ export default function NewInvoicePage() {
           </div>
         </div>
 
+        {/* Stock line items */}
         <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)]">
           <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-3">
             <p className="text-sm font-medium text-[var(--text-primary)]">Line items</p>
@@ -523,7 +635,6 @@ export default function NewInvoicePage() {
                           value={line.description}
                           onChange={(e) => updateLine(line.key, { description: e.target.value })}
                           className={inputClass}
-                          required
                         />
                       </td>
                       <td className="px-2 py-2">
@@ -598,20 +709,135 @@ export default function NewInvoicePage() {
               </tbody>
             </table>
           </div>
+        </div>
 
-          <div className="flex flex-col items-end gap-1 border-t border-[var(--border)] bg-[var(--background)] px-4 py-3 text-sm">
-            <div className="flex w-56 justify-between text-[var(--text-secondary)]">
-              <span>Subtotal</span>
-              <span>₹{totals.subtotal.toFixed(2)}</span>
+        {/* Additional ledger charges */}
+        <div className="overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--surface)]">
+          <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-3">
+            <div>
+              <p className="text-sm font-medium text-[var(--text-primary)]">
+                Additional charges (Ledger)
+              </p>
+              <p className="text-xs text-[var(--text-muted)]">
+                Transport, fitting, repair, freight, tax, round-off, etc.
+              </p>
             </div>
-            <div className="flex w-56 justify-between text-[var(--text-secondary)]">
-              <span>Tax</span>
-              <span>₹{totals.taxTotal.toFixed(2)}</span>
+            <button
+              type="button"
+              onClick={() => setCharges((p) => [...p, emptyCharge()])}
+              className="text-xs font-medium text-[var(--primary)] hover:underline"
+            >
+              + Add charge
+            </button>
+          </div>
+
+          {charges.length === 0 ? (
+            <p className="p-4 text-sm text-[var(--text-muted)]">
+              No extra charges. Click “+ Add charge” for transport, fitting, repair, etc.
+            </p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[720px] text-sm">
+                <thead className="bg-[var(--background)] text-xs text-[var(--text-muted)]">
+                  <tr>
+                    <th className="px-3 py-2 text-left font-medium min-w-[200px]">Ledger</th>
+                    <th className="px-3 py-2 text-left font-medium">Description</th>
+                    <th className="px-3 py-2 text-right font-medium">Amount</th>
+                    <th className="px-3 py-2 text-right font-medium">GST %</th>
+                    <th className="px-3 py-2 text-right font-medium">Tax</th>
+                    <th className="px-3 py-2 text-right font-medium">Total</th>
+                    <th className="px-3 py-2" />
+                  </tr>
+                </thead>
+                <tbody>
+                  {charges.map((c) => {
+                    const { amount, tax, total } = calcCharge(c);
+                    return (
+                      <tr key={c.key} className="border-t border-[var(--border)]">
+                        <td className="px-2 py-2">
+                          <SearchableSelect
+                            options={ledgerOptions}
+                            value={c.ledger_id}
+                            onChange={(id) => onPickLedger(c.key, id)}
+                            placeholder="Search ledger…"
+                          />
+                        </td>
+                        <td className="px-2 py-2">
+                          <input
+                            value={c.description}
+                            onChange={(e) =>
+                              updateCharge(c.key, { description: e.target.value })
+                            }
+                            className={inputClass}
+                            placeholder="e.g. Transport to site"
+                          />
+                        </td>
+                        <td className="px-2 py-2">
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            value={c.amount}
+                            onChange={(e) => updateCharge(c.key, { amount: e.target.value })}
+                            className={`${inputClass} w-28 text-right`}
+                          />
+                        </td>
+                        <td className="px-2 py-2">
+                          <input
+                            type="number"
+                            min="0"
+                            max="100"
+                            step="0.01"
+                            value={c.gst_rate}
+                            onChange={(e) => updateCharge(c.key, { gst_rate: e.target.value })}
+                            className={`${inputClass} w-20 text-right`}
+                          />
+                        </td>
+                        <td className="px-3 py-2 text-right whitespace-nowrap">
+                          ₹{tax.toFixed(2)}
+                        </td>
+                        <td className="px-3 py-2 text-right font-medium whitespace-nowrap">
+                          ₹{total.toFixed(2)}
+                        </td>
+                        <td className="px-2 py-2">
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setCharges((p) => p.filter((x) => x.key !== c.key))
+                            }
+                            className="text-xs text-[var(--danger)] hover:underline"
+                          >
+                            ✕
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
-            <div className="flex w-56 justify-between text-base font-semibold text-[var(--text-primary)]">
-              <span>Grand total</span>
-              <span>₹{totals.grandTotal.toFixed(2)}</span>
+          )}
+        </div>
+
+        {/* Totals */}
+        <div className="flex flex-col items-end gap-1 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3 text-sm">
+          <div className="flex w-64 justify-between text-[var(--text-secondary)]">
+            <span>Items subtotal</span>
+            <span>₹{totals.itemsSub.toFixed(2)}</span>
+          </div>
+          {totals.chargesSub > 0 && (
+            <div className="flex w-64 justify-between text-[var(--text-secondary)]">
+              <span>Charges</span>
+              <span>₹{totals.chargesSub.toFixed(2)}</span>
             </div>
+          )}
+          <div className="flex w-64 justify-between text-[var(--text-secondary)]">
+            <span>Tax</span>
+            <span>₹{totals.taxTotal.toFixed(2)}</span>
+          </div>
+          <div className="flex w-64 justify-between border-t border-[var(--border)] pt-2 text-base font-semibold text-[var(--text-primary)]">
+            <span>Grand total</span>
+            <span>₹{totals.grandTotal.toFixed(2)}</span>
           </div>
         </div>
 
@@ -632,7 +858,6 @@ export default function NewInvoicePage() {
         </div>
       </form>
 
-      {/* Customer quick-add modal */}
       {showCustomerModal && (
         <Modal title="Add customer" onClose={() => setShowCustomerModal(false)}>
           <form onSubmit={saveQuickCustomer} className="space-y-3">
@@ -687,7 +912,6 @@ export default function NewInvoicePage() {
         </Modal>
       )}
 
-      {/* Stock item quick-add modal */}
       {showItemModal && (
         <Modal title="Add stock item" onClose={() => setShowItemModal(false)}>
           <form onSubmit={saveQuickItem} className="space-y-3">
